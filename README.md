@@ -1,5 +1,8 @@
 # Jedyvim (IN PROGRESS)
 
+## Demo
+https://alexeykarnachev.github.io/jedyvim/
+
 ## Added
 - Basic typing and text editing (SPACE, RETURN, BACKSPACE, TAB, etc)
 - Normal/Insert modes switch (ESC)
