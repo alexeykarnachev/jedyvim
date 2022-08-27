@@ -61,7 +61,7 @@ function draw() {
                 CONTEXT.arc(cell_pos.x + cell_pos.w * 0.5, cell_pos.y + cell_pos.h * 0.5, 2, 0, 2 * Math.PI);
                 CONTEXT.fill();
             } else {
-                if (!VIM.is_insert_mode() && DOC.cursor_pos.i_row === i_row && DOC.cursor_pos.i_col === i_col) {
+                if (!VIM.is_insert_mode() && cursor_pos.i_row === i_row && cursor_pos.i_col === i_col) {
                     CONTEXT.fillStyle = BACKGROUND_COLOR;
                 } else {
                     CONTEXT.fillStyle = TEXT_COLOR;
