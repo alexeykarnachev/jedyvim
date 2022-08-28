@@ -1,7 +1,7 @@
 import { Doc } from "./doc.js";
 import { is_printable } from "./keyboard_events.js";
 
-const MODES = {
+export const MODES = {
     normal: "normal",
     insert: "insert"
 }
