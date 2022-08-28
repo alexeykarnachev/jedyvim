@@ -121,9 +121,10 @@ export class Doc {
             i_char += 1;
         }
 
-        if (i_row < n_rows - 1 && i_col != 0) {
-            lines.push(line);
-        }
+        // if (i_row < n_rows - 1 && i_col != 0) {
+        //     lines.push(line);
+        // }
+        lines.push(line);
 
         return { lines: lines, cursor_pos: cursor_pos };
     }
