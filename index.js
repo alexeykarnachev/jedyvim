@@ -50,6 +50,7 @@ const ROW_NUMBER_GRID = new Grid(
     0,
     0
 )
+var TOP_VIEW_ROW = 0;
 
 function onresize() {
     CANVAS.width = window.innerWidth;
@@ -100,30 +101,39 @@ function get_row_number_lines(line_numbers, grid_n_rows) {
     return lines;
 }
 
-function get_doc_view(doc_on_grid, row_top, row_bot) {
+function get_doc_view(doc_on_grid, row_top, n_rows) {
+    let row_bot = row_top + n_rows - 1;
     let doc_view = {
         lines: doc_on_grid.lines.slice(row_top, row_bot + 1),
         line_numbers: doc_on_grid.line_numbers.slice(row_top, row_bot + 1),
     };
 
     let cursor_pos = doc_on_grid.grid_cursor_pos;
-    if (cursor_pos.i_row < row_top || cursor_pos.i_row >= row_bot) {
+    if (cursor_pos.i_row < row_top || cursor_pos.i_row > row_bot) {
         doc_view.grid_cursor_pos = null;
     } else {
-        doc_view.grid_cursor_pos = {i_row: cursor_pos.i_row - row_top, i_col: cursor_pos.i_col};
+        doc_view.grid_cursor_pos = { i_row: cursor_pos.i_row - row_top, i_col: cursor_pos.i_col };
     }
 
     return doc_view;
 }
 
+
 function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
     let doc_on_grid = DOC.put_on_grid_with_word_warping(DOC_GRID.n_cols);
-    let info_line = get_info_line(doc_on_grid.grid_cursor_pos.i_row, doc_on_grid.grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
-    let doc_view = get_doc_view(doc_on_grid, 2, DOC_GRID.n_rows - 1);
+    let grid_cursor_pos = doc_on_grid.grid_cursor_pos;
+    if (grid_cursor_pos.i_row >= TOP_VIEW_ROW + DOC_GRID.n_rows) {
+        TOP_VIEW_ROW = grid_cursor_pos.i_row - DOC_GRID.n_rows + 1;
+    } else if (grid_cursor_pos.i_row < TOP_VIEW_ROW) {
+        TOP_VIEW_ROW = grid_cursor_pos.i_row;
+    }
+
+    let info_line = get_info_line(grid_cursor_pos.i_row, grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
+    let doc_view = get_doc_view(doc_on_grid, TOP_VIEW_ROW, DOC_GRID.n_rows);
 
     let lines = doc_view.lines;
-    let grid_cursor_pos = doc_view.grid_cursor_pos;
+    grid_cursor_pos = doc_view.grid_cursor_pos;
     let row_number_lines = get_row_number_lines(doc_view.line_numbers, DOC_GRID.n_rows);
 
     if (grid_cursor_pos !== null) {
