@@ -79,18 +79,21 @@ function get_info_line(i_row, i_col, n_total_cols, mode) {
     return info;
 }
 
-function get_row_number_lines(n_doc_rows, n_grid_rows) {
-    let lines = [];
+function get_row_number_lines(line_numbers, grid_n_rows) {
+    let lines = Array(grid_n_rows).fill("~    ");
+    let prev_line_number = null;
 
-    for (let i = 1; i < n_grid_rows + 1; ++i) {
-        if (i <= n_doc_rows) {
-            let s = i.toString();
+    for (let i = 0; i < line_numbers.length; ++i) {
+
+        if (line_numbers[i] !== prev_line_number) {
+            let s = line_numbers[i].toString();
             if (s.length > 4) {
                 throw("Number of lines > 999 is not supported now")
             }
-            lines.push(" ".repeat(3 - s.length) + s + " ");
+            lines[i] = " ".repeat(3 - s.length) + s + " ";
+            prev_line_number = line_numbers[i];
         } else {
-            lines.push("~    ");
+            lines[i] = "     ";
         }
     }
 
@@ -101,10 +104,10 @@ function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
     let doc_on_grid = DOC.put_on_grid_with_word_warping(DOC_GRID.n_rows, DOC_GRID.n_cols);
     let lines = doc_on_grid.lines;
-    let cursor_pos = doc_on_grid.cursor_pos;
-    let cursor_cell = DOC_GRID.get_cell_pos(cursor_pos.i_row, cursor_pos.i_col);
-    let info_line = get_info_line(cursor_pos.i_row, cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
-    let row_number_lines = get_row_number_lines(Math.max(lines.length, cursor_pos.i_row + 1), DOC_GRID.n_rows);
+    let grid_cursor_pos = doc_on_grid.grid_cursor_pos;
+    let cursor_cell = DOC_GRID.get_cell_pos(grid_cursor_pos.i_row, grid_cursor_pos.i_col);
+    let info_line = get_info_line(grid_cursor_pos.i_row, grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
+    let row_number_lines = get_row_number_lines(doc_on_grid.line_numbers, DOC_GRID.n_rows);
     CONTEXT.fillStyle = CURSOR_COLOR;
     if (VIM.is_insert_mode()) {
         CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, EDIT_CURSOR_WIDTH, cursor_cell.h);
@@ -147,7 +150,7 @@ function draw() {
                 CONTEXT.arc(cell_pos.x + cell_pos.w * 0.5, cell_pos.y + cell_pos.h * 0.5, 2, 0, 2 * Math.PI);
                 CONTEXT.fill();
             } else {
-                if (!VIM.is_insert_mode() && cursor_pos.i_row === i_row && cursor_pos.i_col === i_col) {
+                if (!VIM.is_insert_mode() && grid_cursor_pos.i_row === i_row && grid_cursor_pos.i_col === i_col) {
                     CONTEXT.fillStyle = BACKGROUND_COLOR;
                 } else {
                     CONTEXT.fillStyle = TEXT_COLOR;

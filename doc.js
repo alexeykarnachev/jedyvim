@@ -89,12 +89,15 @@ export class Doc {
     }
 
     put_on_grid_with_word_warping(n_rows, n_cols) {
-        let lines = [];
         let line = [];
+        let lines = [];
+        let line_numbers = [];
+        let line_number = 1;
         let i_row = 0;
         let i_col = 0;
         let i_char = 0;
-        let cursor_pos = { i_row: 0, i_col: 0 };
+        let grid_cursor_pos = { i_row: 0, i_col: 0 };
+
         while (true) {
             let char = this.buffer.get_element(i_char);
             if (i_row === n_rows || char == null) {
@@ -107,26 +110,27 @@ export class Doc {
             }
 
             if (i_col === n_cols || char === "\n") {
+                line_numbers.push(line_number);
+                line_number += char === "\n";
+
                 lines.push(line);
                 line = [];
                 i_row += 1;
                 i_col = 0;
             }
 
+
             if (i_char === this.buffer.gap_left - 1) {
-                cursor_pos.i_row = i_row;
-                cursor_pos.i_col = i_col;
+                grid_cursor_pos.i_row = i_row;
+                grid_cursor_pos.i_col = i_col;
             }
 
             i_char += 1;
         }
 
-        // if (i_row < n_rows - 1 && i_col != 0) {
-        //     lines.push(line);
-        // }
         lines.push(line);
-
-        return { lines: lines, cursor_pos: cursor_pos };
+        line_numbers.push(line_number);
+        return { lines: lines, grid_cursor_pos: grid_cursor_pos, line_numbers: line_numbers};
     }
 
     move_cursor_left(n_steps = 1, stop_at_bol = true, with_delete = false) {
