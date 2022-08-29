@@ -88,7 +88,7 @@ function get_row_number_lines(line_numbers, grid_n_rows) {
         if (line_numbers[i] !== prev_line_number) {
             let s = line_numbers[i].toString();
             if (s.length > 4) {
-                throw("Number of lines > 999 is not supported now")
+                throw ("Number of lines > 999 is not supported now")
             }
             lines[i] = " ".repeat(3 - s.length) + s + " ";
             prev_line_number = line_numbers[i];
@@ -100,19 +100,40 @@ function get_row_number_lines(line_numbers, grid_n_rows) {
     return lines;
 }
 
+function get_doc_view(doc_on_grid, row_top, row_bot) {
+    let doc_view = {
+        lines: doc_on_grid.lines.slice(row_top, row_bot + 1),
+        line_numbers: doc_on_grid.line_numbers.slice(row_top, row_bot + 1),
+    };
+
+    let cursor_pos = doc_on_grid.grid_cursor_pos;
+    if (cursor_pos.i_row < row_top || cursor_pos.i_row >= row_bot) {
+        doc_view.grid_cursor_pos = null;
+    } else {
+        doc_view.grid_cursor_pos = {i_row: cursor_pos.i_row - row_top, i_col: cursor_pos.i_col};
+    }
+
+    return doc_view;
+}
+
 function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
-    let doc_on_grid = DOC.put_on_grid_with_word_warping(DOC_GRID.n_rows, DOC_GRID.n_cols);
-    let lines = doc_on_grid.lines;
-    let grid_cursor_pos = doc_on_grid.grid_cursor_pos;
-    let cursor_cell = DOC_GRID.get_cell_pos(grid_cursor_pos.i_row, grid_cursor_pos.i_col);
-    let info_line = get_info_line(grid_cursor_pos.i_row, grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
-    let row_number_lines = get_row_number_lines(doc_on_grid.line_numbers, DOC_GRID.n_rows);
-    CONTEXT.fillStyle = CURSOR_COLOR;
-    if (VIM.is_insert_mode()) {
-        CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, EDIT_CURSOR_WIDTH, cursor_cell.h);
-    } else {
-        CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, cursor_cell.w, cursor_cell.h);
+    let doc_on_grid = DOC.put_on_grid_with_word_warping(DOC_GRID.n_cols);
+    let info_line = get_info_line(doc_on_grid.grid_cursor_pos.i_row, doc_on_grid.grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
+    let doc_view = get_doc_view(doc_on_grid, 2, DOC_GRID.n_rows - 1);
+
+    let lines = doc_view.lines;
+    let grid_cursor_pos = doc_view.grid_cursor_pos;
+    let row_number_lines = get_row_number_lines(doc_view.line_numbers, DOC_GRID.n_rows);
+
+    if (grid_cursor_pos !== null) {
+        CONTEXT.fillStyle = CURSOR_COLOR;
+        let cursor_cell = DOC_GRID.get_cell_pos(grid_cursor_pos.i_row, grid_cursor_pos.i_col);
+        if (VIM.is_insert_mode()) {
+            CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, EDIT_CURSOR_WIDTH, cursor_cell.h);
+        } else {
+            CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, cursor_cell.w, cursor_cell.h);
+        }
     }
 
     for (let i_row = 0; i_row < row_number_lines.length; ++i_row) {

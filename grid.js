@@ -6,8 +6,14 @@ export class Grid {
         this.cell_height = cell_height;
         this.width_offset = width_offset;
         this.height_offset = height_offset;
-        this.n_rows = Math.floor(this.height / this.cell_height);
-        this.n_cols = Math.floor(this.width / this.cell_width);
+    }
+
+    get n_rows() {
+        return Math.floor(this.height / this.cell_height);
+    }
+
+    get n_cols() {
+        return Math.floor(this.width / this.cell_width);
     }
 
     resize(width, height, width_offset, height_offset) {
@@ -15,8 +21,6 @@ export class Grid {
         this.height = height;
         this.width_offset = width_offset;
         this.height_offset = height_offset;
-        this.n_rows = Math.floor(this.height / this.cell_height);
-        this.n_cols = Math.floor(this.width / this.cell_width);
     }
 
     get_cell_pos(i_row, i_col) {

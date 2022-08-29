@@ -88,7 +88,7 @@ export class Doc {
         );
     }
 
-    put_on_grid_with_word_warping(n_rows, n_cols) {
+    put_on_grid_with_word_warping(n_cols) {
         let line = [];
         let lines = [];
         let line_numbers = [];
@@ -100,7 +100,7 @@ export class Doc {
 
         while (true) {
             let char = this.buffer.get_element(i_char);
-            if (i_row === n_rows || char == null) {
+            if (char == null) {
                 break;
             }
 
