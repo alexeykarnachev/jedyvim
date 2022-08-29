@@ -1,11 +1,12 @@
 export class Grid {
     constructor(width, height, cell_width, cell_height, width_offset, height_offset) {
-        this.width = width;
-        this.height = height;
         this.cell_width = cell_width;
         this.cell_height = cell_height;
         this.width_offset = width_offset;
         this.height_offset = height_offset;
+
+        this.width = width - this.width_offset;
+        this.height = height - this.height_offset;
     }
 
     get n_rows() {
@@ -17,10 +18,10 @@ export class Grid {
     }
 
     resize(width, height, width_offset, height_offset) {
-        this.width = width;
-        this.height = height;
         this.width_offset = width_offset;
         this.height_offset = height_offset;
+        this.width = width - this.width_offset;
+        this.height = height - this.height_offset;
     }
 
     get_cell_pos(i_row, i_col) {

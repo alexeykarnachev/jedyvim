@@ -66,9 +66,6 @@ window.onkeydown = event => { VIM.onkeydown(event) };
 
 
 function get_info_line(i_row, i_col, n_total_cols, mode) {
-    i_row += 1;
-    i_col += 1;
-
     if (mode === MODES.insert) {
         var mode_str = "-- INSERT --";
     } else {
@@ -129,7 +126,8 @@ function draw() {
         TOP_VIEW_ROW = grid_cursor_pos.i_row;
     }
 
-    let info_line = get_info_line(grid_cursor_pos.i_row, grid_cursor_pos.i_col, INFO_GRID.n_cols, VIM.mode);
+    let line_number = doc_on_grid.line_numbers[grid_cursor_pos.i_row];
+    let info_line = get_info_line(line_number, grid_cursor_pos.i_col + 1, INFO_GRID.n_cols, VIM.mode);
     let doc_view = get_doc_view(doc_on_grid, TOP_VIEW_ROW, DOC_GRID.n_rows);
 
     let lines = doc_view.lines;
