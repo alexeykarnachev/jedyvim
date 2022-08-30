@@ -65,14 +65,24 @@ window.onresize = onresize;
 window.onkeydown = event => { VIM.onkeydown(event) };
 
 
-function get_info_line(i_row, i_col, n_total_cols, mode) {
+function get_info_line(i_row, i_col, n_total_cols, mode, command) {
     if (mode === MODES.insert) {
         var mode_str = "-- INSERT --";
-    } else {
+        var command_str = "";
+    } else if (mode === MODES.normal) {
         var mode_str = "";
+        var command_str = command.join();
+    } else {
+        throw(`Can't construct info line for '${mode}' mode. Please, implement this branch where this exception has occurred.`)
     }
 
-    let info = mode_str + " ".repeat(n_total_cols - mode_str.length - 13) + `${i_row},${i_col}`;
+    let info = [
+        mode_str,
+        " ".repeat(n_total_cols - mode_str.length - 23),
+        command_str,
+        " ".repeat(10 - command_str.length),
+        `${i_row},${i_col}`
+    ].join("");
 
     return info;
 }
@@ -128,7 +138,7 @@ function draw() {
 
     let info_i_row = doc_on_grid.line_numbers[grid_cursor_pos.i_row];
     let info_i_col = DOC.cursor_pos.i_col + 1;
-    let info_line = get_info_line(info_i_row, info_i_col, INFO_GRID.n_cols, VIM.mode);
+    let info_line = get_info_line(info_i_row, info_i_col, INFO_GRID.n_cols, VIM.mode, VIM.command);
     let doc_view = get_doc_view(doc_on_grid, TOP_VIEW_ROW, DOC_GRID.n_rows);
 
     let lines = doc_view.lines;
