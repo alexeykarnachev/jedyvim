@@ -14,6 +14,7 @@ export class Vim {
         this.doc = doc;
         this.mode = MODES.normal;
         this.i_col_max = 0;
+        this.command = [];
     }
 
     is_insert_mode() {
@@ -39,8 +40,24 @@ export class Vim {
             this.doc.move_cursor_up(this.i_col_max);
         } else if (code === "ArrowDown") {
             this.doc.move_cursor_down(this.i_col_max);
+        } else if (this.mode === MODES.normal && this.command.length === 1) {
+            let command = this.command[0];
+            if (command === "f") {
+                this.doc.move_cursor_to_char_right(key, true, false);
+            } else if (command === "F") {
+                this.doc.move_cursor_to_char_left(key, true, false);
+            } else if (command === "t") {
+                this.doc.move_cursor_to_char_right(key, true, true);
+            } else if (command === "T") {
+                this.doc.move_cursor_to_char_left(key, true, true);
+            }
+            this.command = [];
         } else if (this.mode === MODES.normal) {
-            if (code === "KeyI") {
+            if (code === "KeyF") {
+                this.command.push(shift_key ? "F" : "f");
+            } else if (code === "KeyT") {
+                this.command.push(shift_key ? "T" : "t");
+            } else if (code === "KeyI") {
                 if (shift_key) {
                     this.doc.move_cursor_to_first_nonblank_char_in_line();
                 }

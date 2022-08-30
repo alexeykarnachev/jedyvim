@@ -130,7 +130,7 @@ export class Doc {
 
         lines.push(line);
         line_numbers.push(line_number);
-        return { lines: lines, grid_cursor_pos: grid_cursor_pos, line_numbers: line_numbers};
+        return { lines: lines, grid_cursor_pos: grid_cursor_pos, line_numbers: line_numbers };
     }
 
     move_cursor_left(n_steps = 1, stop_at_bol = true, with_delete = false) {
@@ -244,10 +244,44 @@ export class Doc {
         }
     }
 
+    move_cursor_to_char_right(target_char, stop_at_eol, stop_before_char) {
+        let i = this.buffer.gap_right + 2;
+        let n_steps = stop_before_char ? 0 : 1;
+        while (true) {
+            let char = this.buffer.buffer[i];
+            if (char == null || (stop_at_eol && is_newline(char))) {
+                return;
+            } else if (char === target_char) {
+                this.move_cursor_right(n_steps, false);
+                return;
+            } else {
+                n_steps += 1;
+                i += 1;
+            }
+        }
+    }
+
+    move_cursor_to_char_left(target_char, stop_at_bol, stop_before_char) {
+        let i = this.buffer.gap_left - 1;
+        let n_steps = stop_before_char ? 0 : 1;
+        while (true) {
+            let char = this.buffer.buffer[i];
+            if (char == null || (stop_at_bol && is_newline(char))) {
+                return;
+            } else if (char === target_char) {
+                this.move_cursor_left(n_steps, false);
+                return;
+            } else {
+                n_steps += 1;
+                i -= 1;
+            }
+        }
+    }
+
     move_cursor_to_end_of_line() {
         let n_steps = 0;
         for (let i = this.buffer.gap_right + 1; i < this.buffer.buffer.length; ++i) {
-            if (this.buffer.buffer[i] === "\n") {
+            if (is_newline(this.buffer.buffer[i])) {
                 break;
             }
             n_steps += 1;
