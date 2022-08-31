@@ -22,5 +22,13 @@
         "n_cols": 100,
         "cursor_pos": {"i_row": 0, "i_col": 1},
         "line_numbers": [0]
+    },
+    {
+        "name": "basic_0",
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], "H", "o", "w", " ", "a", "r", "e", " ", "y", "o", "u", "?", ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "b", "b", "b", "b", "b", "i", " ", ["ArrowLeft"], "H", "e", "l", "l", "o", " ", "w", "o", "r", "d", ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowLeft"], ["ArrowRight"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "l", "l", "l", "l", "A", ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "j", "A", ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "h", "h", "k", ["Enter"]],
+        "output": ["Hello", "Hello"],
+        "n_cols": 100,
+        "cursor_pos": {"i_row": 0, "i_col": 2},
+        "line_numbers": [0, 1]
     }
 ]

@@ -52,36 +52,36 @@ KC_1BYTE = []
 (0..255).each {|n| KC_1BYTE.push("<%#04x>" % n)} # Fallback for non-ASCII
 (1..127).each {|n| KC_1BYTE[n] = "<C-#{(n ^ 0x40).chr}>"}
 (32..126).each {|c| KC_1BYTE[c] = c.chr } # Printing chars
-KC_1BYTE[0x1b] = "Escape" # Special names for a few control chars
-KC_1BYTE[0x0d] = "Enter"
+KC_1BYTE[0x1b] = ["Escape"] # Special names for a few control chars
+KC_1BYTE[0x0d] = ["Enter"]
 KC_1BYTE[0x0a] = "<NL>"
-KC_1BYTE[0x09] = "Tab"
+KC_1BYTE[0x09] = ["Tab"]
 
 KC_MBYTE = Hash.new do |_h,k|
-  "<UNKNOWN>" # For missing keycodes
+  false # For missing keycodes
 end.update({
   # This list has been populated by looking at
   # :h terminal-options and vim source files:
   # keymap.h and misc2.c
-  "k1" => "F1",
-  "k2" => "F2",
-  "k3" => "F3",
-  "k4" => "F4",
-  "k5" => "F5",
-  "k6" => "F6",
-  "k7" => "F7",
-  "k8" => "F8",
-  "k9" => "F9",
-  "k;" => "F10",
-  "F1" => "F11",
-  "F2" => "F12",
-  "F3" => "F13",
-  "F4" => "F14",
-  "F5" => "F15",
-  "F6" => "F16",
-  "F7" => "F17",
-  "F8" => "F18",
-  "F9" => "F19",
+  "k1" => ["F1"],
+  "k2" => ["F2"],
+  "k3" => ["F3"],
+  "k4" => ["F4"],
+  "k5" => ["F5"],
+  "k6" => ["F6"],
+  "k7" => ["F7"],
+  "k8" => ["F8"],
+  "k9" => ["F9"],
+  "k;" => ["F10"],
+  "F1" => ["F11"],
+  "F2" => ["F12"],
+  "F3" => ["F13"],
+  "F4" => ["F14"],
+  "F5" => ["F15"],
+  "F6" => ["F16"],
+  "F7" => ["F17"],
+  "F8" => ["F18"],
+  "F9" => ["F19"],
 
   "%1" => "<Help>",
   "&8" => "<Undo>",
@@ -114,14 +114,14 @@ end.update({
   "@7" => "<End>",
   "kI" => "<Insert>",
   "kD" => "<Del>",
-  "kb" => "Backspace",
+  "kb" => ["Backspace"],
 
-  "ku" => "ArrowUp",
-  "kd" => "ArrowDown",
-  "kl" => "ArrowLeft",
-  "kr" => "ArrowRight",
-  "#4" => "ArrowLeft",
-  "%i" => "ArrowRight",
+  "ku" => ["ArrowUp"],
+  "kd" => ["ArrowDown"],
+  "kl" => ["ArrowLeft"],
+  "kr" => ["ArrowRight"],
+  "#4" => ["ArrowLeft"],
+  "%i" => ["ArrowRight"],
 
   "kB" => "<S-Tab>",
   "\xffX" => "<C-@>",
