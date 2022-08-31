@@ -51,12 +51,25 @@ export class Vim {
             } else if (command === "T") {
                 this.doc.move_cursor_to_char_left(key, true, true);
             }
+            
+            if (command === "d" && code === "KeyI" && !shift_key) {
+                this.command.push("i");
+            } else {
+                this.command = [];
+            }
+        } else if (this.mode === MODES.normal && this.command.length === 2) {
+            let command = this.command.join("");
+            if (command === "di" && code === "KeyW") {
+                this.doc.delete_word()
+            }
             this.command = [];
         } else if (this.mode === MODES.normal) {
             if (code === "KeyF") {
                 this.command.push(shift_key ? "F" : "f");
             } else if (code === "KeyT") {
                 this.command.push(shift_key ? "T" : "t");
+            } else if (code === "KeyD" && !shift_key) {
+                this.command.push("d");
             } else if (code === "KeyI") {
                 if (shift_key) {
                     this.doc.move_cursor_to_first_nonblank_char_in_line();

@@ -83,8 +83,12 @@ export class GapBuffer {
         this.insert_at_pos(elements, this.gap_left);
     }
 
-    delete(n_steps=1) {
+    delete_left(n_steps=1) {
         this.gap_left = Math.max(0, this.gap_left - n_steps);
+    }
+
+    delete_right(n_steps=1) {
+        this.gap_right = Math.min(this.buffer.length - 1, this.gap_right + n_steps);
     }
 
     grow() {

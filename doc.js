@@ -88,7 +88,7 @@ export class Doc {
         );
     }
 
-    put_on_grid_with_word_warping(n_cols) {
+    put_on_grid_with_word_wrapping(n_cols) {
         let line = [];
         let lines = [];
         let line_numbers = [];
@@ -141,13 +141,13 @@ export class Doc {
 
             if (with_delete) {
                 let char_to_delete = this.buffer.get_element_left_to_cursor();
-                if (char_to_delete === "\n") {
+                if (is_newline(char_to_delete)) {
                     let prev_line_length = this.current_line_length;
-                    this.buffer.delete();
+                    this.buffer.delete_left();
                     this.cursor_pos.i_col = this.current_line_length - prev_line_length;
                     this.cursor_pos.i_row -= 1;
                 } else {
-                    this.buffer.delete();
+                    this.buffer.delete_left();
                     this.cursor_pos.i_col -= 1;
                 }
             } else {
@@ -323,9 +323,31 @@ export class Doc {
         this.insert_text("\n");
     }
 
-
     delete_text(n = 1) {
         this.move_cursor_left(n, false, true);
+    }
+
+    delete_word() {
+        let left_n_steps = 0;
+        let start_char = this.buffer.get_element_right_to_cursor();
+        while (true) {
+            let char = this.buffer.get_element_left_to_cursor(left_n_steps + 1);
+            if (!is_same_type(start_char, char)) {
+                break;
+            }
+            left_n_steps += 1
+        }
+
+        let right_n_steps = 1;
+        while (true) {
+            let char = this.buffer.get_element_right_to_cursor(right_n_steps + 1);
+            if (!is_same_type(start_char, char)) {
+                break;
+            }
+            right_n_steps += 1
+        }
+        this.move_cursor_right(right_n_steps, false);
+        this.move_cursor_left(right_n_steps + left_n_steps, false, true);
     }
 }
 
@@ -335,6 +357,20 @@ function is_newline(char) {
 
 function is_nonblank(char) {
     return (char != null && !char.match(/\s/));
+}
+
+function is_same_type(char1, char2) {
+    if (is_newline(char1) || is_newline(char2) || char1 == null || char2 == null) {
+        return false;
+    } else if (
+        (!is_nonblank(char1) && !is_nonblank(char2))
+        || (is_alnum(char1) && is_alnum(char2))
+        || (!is_alnum(char1) && !is_alnum(char2) && is_nonblank(char1) && is_nonblank(char2))
+    ) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function is_alnum(char, or_underscore = true) {

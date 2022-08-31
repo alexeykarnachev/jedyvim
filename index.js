@@ -71,7 +71,7 @@ function get_info_line(i_row, i_col, n_total_cols, mode, command) {
         var command_str = "";
     } else if (mode === MODES.normal) {
         var mode_str = "";
-        var command_str = command.join();
+        var command_str = command.join("");
     } else {
         throw(`Can't construct info line for '${mode}' mode. Please, implement this branch where this exception has occurred.`)
     }
@@ -128,7 +128,7 @@ function get_doc_view(doc_on_grid, row_top, n_rows) {
 
 function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
-    let doc_on_grid = DOC.put_on_grid_with_word_warping(DOC_GRID.n_cols);
+    let doc_on_grid = DOC.put_on_grid_with_word_wrapping(DOC_GRID.n_cols);
     let grid_cursor_pos = doc_on_grid.grid_cursor_pos;
     if (grid_cursor_pos.i_row >= TOP_VIEW_ROW + DOC_GRID.n_rows) {
         TOP_VIEW_ROW = grid_cursor_pos.i_row - DOC_GRID.n_rows + 1;
@@ -210,4 +210,4 @@ function main() {
     requestAnimationFrame(draw);
 }
 
-main();
+window.onload = main;
