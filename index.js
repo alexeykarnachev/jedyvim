@@ -1,6 +1,7 @@
 import { Grid } from "./grid.js";
 import { Doc } from "./doc.js";
 import { Vim, MODES } from "./vim.js";
+import { run_tests } from "./tests.js";
 
 const DIV = document.getElementById("text_editor");
 const CANVAS = /** @type {HTMLCanvasElement} */ document.createElement("canvas");
@@ -92,9 +93,8 @@ function get_row_number_lines(line_numbers, grid_n_rows) {
     let prev_line_number = null;
 
     for (let i = 0; i < line_numbers.length; ++i) {
-
         if (line_numbers[i] !== prev_line_number) {
-            let s = line_numbers[i].toString();
+            let s = (line_numbers[i] + 1).toString();
             if (s.length > 4) {
                 throw ("Number of lines > 999 is not supported now")
             }
@@ -206,8 +206,10 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
-function main() {
+async function main() {
+    await run_tests(false);
     requestAnimationFrame(draw);
 }
 
-window.onload = main;
+
+main();

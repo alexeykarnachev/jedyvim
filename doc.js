@@ -2,7 +2,7 @@ import { GapBuffer } from "./gap_buffer.js";
 
 export class Doc {
     constructor() {
-        this.buffer = new GapBuffer(5);
+        this.buffer = new GapBuffer(32);
         this.cursor_pos = { i_row: 0, i_col: 0 };
     }
 
@@ -92,7 +92,7 @@ export class Doc {
         let line = [];
         let lines = [];
         let line_numbers = [];
-        let line_number = 1;
+        let line_number = 0;
         let i_row = 0;
         let i_col = 0;
         let i_char = 0;

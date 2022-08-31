@@ -1,0 +1,26 @@
+[
+    {
+        "name": "empty",
+        "input": [""],
+        "output": [""],
+        "n_cols": 100,
+        "cursor_pos": {"i_row": 0, "i_col": 0},
+        "line_numbers": [0]
+    },
+    {
+        "name": "simple_typing",
+        "input": ["i", "Hello, world", ["Backspace", "Backspace"]],
+        "output": ["Hello, wor"],
+        "n_cols": 100,
+        "cursor_pos": {"i_row": 0, "i_col": 10},
+        "line_numbers": [0]
+    },
+    {
+        "name": "simple_navigation",
+        "input": ["i", "Hello, world", ["Escape"], "bllhhhhhhhh"],
+        "output": ["Hello, world"],
+        "n_cols": 100,
+        "cursor_pos": {"i_row": 0, "i_col": 1},
+        "line_numbers": [0]
+    }
+]

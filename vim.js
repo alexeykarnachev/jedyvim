@@ -27,20 +27,22 @@ export class Vim {
     onkeydown(event) {
         event.preventDefault();
 
-        let code = event.code;
         let key = event.key;
-        let shift_key = event.shiftKey;
+        this.process_input(key)
+    }
+
+    process_input(key) {
         let mode = this.mode;
 
-        if (code === "ArrowLeft") {
+        if (key === "ArrowLeft") {
             this.doc.move_cursor_left();
-        } else if (code === "ArrowRight") {
+        } else if (key === "ArrowRight") {
             this.doc.move_cursor_right();
-        } else if (code === "ArrowUp") {
+        } else if (key === "ArrowUp") {
             this.doc.move_cursor_up(this.i_col_max);
-        } else if (code === "ArrowDown") {
+        } else if (key === "ArrowDown") {
             this.doc.move_cursor_down(this.i_col_max);
-        } else if (this.mode === MODES.normal && this.command.length === 1) {
+        } else if (this.mode === MODES.normal && this.command.length === 1 && is_printable(key)) {
             let command = this.command[0];
             if (command === "f") {
                 this.doc.move_cursor_to_char_right(key, true, false);
@@ -51,78 +53,81 @@ export class Vim {
             } else if (command === "T") {
                 this.doc.move_cursor_to_char_left(key, true, true);
             }
-            
-            if (command === "d" && code === "KeyI" && !shift_key) {
-                this.command.push("i");
+
+            if (command === "d" && key === "i") {
+                this.command.push(key);
             } else {
                 this.command = [];
             }
         } else if (this.mode === MODES.normal && this.command.length === 2) {
             let command = this.command.join("");
-            if (command === "di" && code === "KeyW") {
+            if (command === "di" && key.toLowerCase() === "w") {
                 this.doc.delete_word()
             }
             this.command = [];
         } else if (this.mode === MODES.normal) {
-            if (code === "KeyF") {
-                this.command.push(shift_key ? "F" : "f");
-            } else if (code === "KeyT") {
-                this.command.push(shift_key ? "T" : "t");
-            } else if (code === "KeyD" && !shift_key) {
-                this.command.push("d");
-            } else if (code === "KeyI") {
-                if (shift_key) {
-                    this.doc.move_cursor_to_first_nonblank_char_in_line();
-                }
+            if (
+                ["f", "t"].includes(key.toLowerCase())
+                || ["d"].includes(key)
+            ) {
+                this.command.push(key);
+            } else if (key === "i") {
                 this.mode = MODES.insert;
-            } else if (code === "KeyA") {
-                if (shift_key) {
-                    this.doc.move_cursor_to_end_of_line();
-                } else {
-                    this.doc.move_cursor_right();
-                }
-                this.mode = MODES.insert;
-            } else if (code === "KeyW") {
-                this.doc.move_cursor_word_right(false, !shift_key);
-            } else if (code === "KeyB") {
-                this.doc.move_cursor_word_left(false, !shift_key);
-            } else if (code === "KeyE") {
-                this.doc.move_cursor_word_end_right(false, !shift_key);
-            } else if (code === "KeyO") {
-                if (shift_key) {
-                    this.doc.insert_new_line_above_cursor();
-                } else {
-                    this.doc.insert_new_line_below_cursor();
-                }
-                this.mode = MODES.insert;
-            } else if (code === "Digit4" && shift_key) { // $
-                this.doc.move_cursor_to_end_of_line();
-            } else if (code === "Digit6" && shift_key) { // ^
+            } else if (key === "I") {
                 this.doc.move_cursor_to_first_nonblank_char_in_line();
-            } else if (code === "Minus" && shift_key) { // _
-                this.doc.move_cursor_to_first_nonblank_char_in_line();
-            } else if (code === "Digit0") {
-                this.doc.move_cursor_to_beginning_of_line();
-            } else if (code === "KeyH") {
-                this.doc.move_cursor_left();
-            } else if (code === "KeyL") {
+                this.mode = MODES.insert;
+            } else if (key === "a") {
                 this.doc.move_cursor_right();
-            } else if (code === "KeyK") {
+                this.mode = MODES.insert;
+            } else if (key === "A") {
+                this.doc.move_cursor_to_end_of_line();
+                this.mode = MODES.insert;
+            } else if (key === "w") {
+                this.doc.move_cursor_word_right(false, true);
+            } else if (key === "W") {
+                this.doc.move_cursor_word_right(false, false);
+            } else if (key === "b") {
+                this.doc.move_cursor_word_left(false, true);
+            } else if (key === "B") {
+                this.doc.move_cursor_word_left(false, false);
+            } else if (key === "e") {
+                this.doc.move_cursor_word_end_right(false, true);
+            } else if (key === "E") {
+                this.doc.move_cursor_word_end_right(false, false);
+            } else if (key === "o") {
+                this.doc.insert_new_line_below_cursor();
+                this.mode = MODES.insert;
+            } else if (key === "O") {
+                this.doc.insert_new_line_above_cursor();
+                this.mode = MODES.insert;
+            } else if (key === "$") {
+                this.doc.move_cursor_to_end_of_line();
+            } else if (key === "^") {
+                this.doc.move_cursor_to_first_nonblank_char_in_line();
+            } else if (key === "_") {
+                this.doc.move_cursor_to_first_nonblank_char_in_line();
+            } else if (key === "0") {
+                this.doc.move_cursor_to_beginning_of_line();
+            } else if (key === "h") {
+                this.doc.move_cursor_left();
+            } else if (key === "l") {
+                this.doc.move_cursor_right();
+            } else if (key === "k") {
                 this.doc.move_cursor_up(this.i_col_max);
-            } else if (code === "KeyJ") {
+            } else if (key === "j") {
                 this.doc.move_cursor_down(this.i_col_max);
             }
         } else if (this.mode === MODES.insert) {
             if (is_printable(key)) {
                 this.doc.insert_text(key);
-            } else if (code === "Tab") {
+            } else if (key === "Tab") {
                 this.doc.insert_text("    ");
-            } else if (code === "Escape") {
+            } else if (key === "Escape") {
                 this.mode = MODES.normal;
                 this.doc.move_cursor_left();
-            } else if (code === "Enter") {
+            } else if (key === "Enter") {
                 this.doc.insert_text("\n");
-            } else if (code === "Backspace") {
+            } else if (key === "Backspace") {
                 this.doc.delete_text();
             }
         }
@@ -133,8 +138,8 @@ export class Vim {
 
         if (
             (mode != this.mode)
-            || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "KeyK", "KeyJ"].includes(code))
-            || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(code))
+            || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
+            || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
         ) {
             this.i_col_max = this.doc.cursor_pos.i_col;
         } else {
