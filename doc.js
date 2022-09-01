@@ -2,7 +2,7 @@ import { GapBuffer } from "./gap_buffer.js";
 
 export class Doc {
     constructor() {
-        this._buffer = new GapBuffer(32);
+        this.buffer = new GapBuffer(32);
         this.head = { i_row: 0, i_col: 0, abs: 0 };
         this.tail = { ...this.head };
         this._tail_is_fixed = false;
@@ -25,40 +25,40 @@ export class Doc {
     }
 
     get is_at_eol() {
-        let char = this._buffer.get_element_right_to_cursor();
+        let char = this.buffer.get_element_right_to_cursor();
         return (char == null || char === "\n");
     }
 
     get is_at_eod() {
-        let char = this._buffer.get_element_right_to_cursor();
+        let char = this.buffer.get_element_right_to_cursor();
         return char == null;
     }
 
     get is_at_bol() {
-        let char = this._buffer.get_element_left_to_cursor();
+        let char = this.buffer.get_element_left_to_cursor();
         return (char == null || char === "\n");
     }
 
     get is_at_bod() {
-        let char = this._buffer.get_element_left_to_cursor();
+        let char = this.buffer.get_element_left_to_cursor();
         return char == null;
     }
 
     get current_line_length() {
         let length = 0;
-        let i = this._buffer.gap_right + 1;
+        let i = this.buffer.gap_right + 1;
         while (
-            i < this._buffer.buffer.length
-            && ![null, "\n"].includes(this._buffer.buffer[i])
+            i < this.buffer.buffer.length
+            && ![null, "\n"].includes(this.buffer.buffer[i])
         ) {
             i += 1;
             length += 1;
         }
 
-        i = this._buffer.gap_left - 1;
+        i = this.buffer.gap_left - 1;
         while (
             i >= 0
-            && ![null, "\n"].includes(this._buffer.buffer[i])
+            && ![null, "\n"].includes(this.buffer.buffer[i])
         ) {
             i -= 1;
             length += 1;
@@ -68,8 +68,8 @@ export class Doc {
     }
 
     get is_at_nonblank_beginning() {
-        let left = this._buffer.get_element_left_to_cursor();
-        let right = this._buffer.get_element_right_to_cursor();
+        let left = this.buffer.get_element_left_to_cursor();
+        let right = this.buffer.get_element_right_to_cursor();
         return (
             (left == null && is_nonblank(right))
             || (!is_nonblank(left) && is_nonblank(right))
@@ -78,8 +78,8 @@ export class Doc {
     }
 
     get is_at_keyword_beginning() {
-        let left = this._buffer.get_element_left_to_cursor();
-        let right = this._buffer.get_element_right_to_cursor();
+        let left = this.buffer.get_element_left_to_cursor();
+        let right = this.buffer.get_element_right_to_cursor();
         return (
             this.is_at_nonblank_beginning
             || (is_alnum(left) && !is_alnum(right) && is_nonblank(right))
@@ -88,8 +88,8 @@ export class Doc {
     }
 
     get is_at_nonblank_ending() {
-        let right = this._buffer.get_element_right_to_cursor();
-        let after_right = this._buffer.get_element_right_to_cursor(2);
+        let right = this.buffer.get_element_right_to_cursor();
+        let after_right = this.buffer.get_element_right_to_cursor(2);
         return (
             (after_right == null && is_nonblank(right))
             || (!is_nonblank(after_right) && is_nonblank(right))
@@ -97,8 +97,8 @@ export class Doc {
     }
 
     get is_at_keyword_ending() {
-        let right = this._buffer.get_element_right_to_cursor();
-        let after_right = this._buffer.get_element_right_to_cursor(2);
+        let right = this.buffer.get_element_right_to_cursor();
+        let after_right = this.buffer.get_element_right_to_cursor(2);
         return (
             this.is_at_nonblank_ending
             || (is_alnum(after_right) && !is_alnum(right) && is_nonblank(right))
@@ -118,7 +118,7 @@ export class Doc {
         let grid_tail_pos = { i_row: 0, i_col: 0 };
 
         while (true) {
-            let char = this._buffer.get_element(i_char);
+            let char = this.buffer.get_element(i_char);
             if (char == null) {
                 break;
             }
@@ -163,7 +163,7 @@ export class Doc {
                 break;
             }
 
-            this._buffer.move_left();
+            this.buffer.move_left();
             if (this.is_at_eol) {
                 this.head.i_col = this.current_line_length;
                 this.head.i_row -= 1;
@@ -172,7 +172,7 @@ export class Doc {
             }
         }
 
-        this.head.abs = this._buffer.gap_left;
+        this.head.abs = this.buffer.gap_left;
         if (!this._tail_is_fixed) {
             this.move_tail_to_head();
         }
@@ -190,10 +190,10 @@ export class Doc {
             } else {
                 this.head.i_col += 1;
             }
-            this._buffer.move_right();
+            this.buffer.move_right();
         }
 
-        this.head.abs = this._buffer.gap_left;
+        this.head.abs = this.buffer.gap_left;
         if (!this._tail_is_fixed) {
             this.move_tail_to_head();
         }
@@ -260,16 +260,16 @@ export class Doc {
 
     move_head_to_first_nonblank_char_in_line() {
         this.move_head_to_beginning_of_line();
-        if (!is_nonblank(this._buffer.get_element_right_to_cursor())) {
+        if (!is_nonblank(this.buffer.get_element_right_to_cursor())) {
             this.move_head_word_right(true);
         }
     }
 
     move_head_to_char_right(target_char, stop_at_eol, stop_before_char) {
-        let i = this._buffer.gap_right + 2;
+        let i = this.buffer.gap_right + 2;
         let n_steps = stop_before_char ? 0 : 1;
         while (true) {
-            let char = this._buffer.buffer[i];
+            let char = this.buffer.buffer[i];
             if (char == null || (stop_at_eol && is_newline(char))) {
                 return;
             } else if (char === target_char) {
@@ -283,10 +283,10 @@ export class Doc {
     }
 
     move_head_to_char_left(target_char, stop_at_bol, stop_before_char) {
-        let i = this._buffer.gap_left - 1;
+        let i = this.buffer.gap_left - 1;
         let n_steps = stop_before_char ? 0 : 1;
         while (true) {
-            let char = this._buffer.buffer[i];
+            let char = this.buffer.buffer[i];
             if (char == null || (stop_at_bol && is_newline(char))) {
                 return;
             } else if (char === target_char) {
@@ -301,8 +301,8 @@ export class Doc {
 
     move_head_to_end_of_line() {
         let n_steps = 0;
-        for (let i = this._buffer.gap_right + 1; i < this._buffer.buffer.length; ++i) {
-            if (is_newline(this._buffer.buffer[i])) {
+        for (let i = this.buffer.gap_right + 1; i < this.buffer.buffer.length; ++i) {
+            if (is_newline(this.buffer.buffer[i])) {
                 break;
             }
             n_steps += 1;
@@ -312,8 +312,8 @@ export class Doc {
 
     move_head_to_beginning_of_line() {
         let n_steps = 0;
-        for (let i = this._buffer.gap_left - 1; i >= 0; --i) {
-            if (this._buffer.buffer[i] === "\n") {
+        for (let i = this.buffer.gap_left - 1; i >= 0; --i) {
+            if (this.buffer.buffer[i] === "\n") {
                 break;
             }
             n_steps += 1
@@ -324,9 +324,9 @@ export class Doc {
     select_word() {
         this.move_tail_to_head();
         let left_n_steps = 0;
-        let start_char = this._buffer.get_element_right_to_cursor();
+        let start_char = this.buffer.get_element_right_to_cursor();
         while (true) {
-            let char = this._buffer.get_element_left_to_cursor(left_n_steps + 1);
+            let char = this.buffer.get_element_left_to_cursor(left_n_steps + 1);
             if (!is_same_type(start_char, char)) {
                 break;
             }
@@ -335,7 +335,7 @@ export class Doc {
 
         let right_n_steps = 1;
         while (true) {
-            let char = this._buffer.get_element_right_to_cursor(right_n_steps + 1);
+            let char = this.buffer.get_element_right_to_cursor(right_n_steps + 1);
             if (!is_same_type(start_char, char)) {
                 break;
             }
@@ -350,11 +350,11 @@ export class Doc {
         if (this._tail_is_fixed) {
             let n_to_delete = this.head.abs - this.tail.abs;
             if (n_to_delete > 0) {
-                this._buffer.delete_left(n_to_delete);
+                this.buffer.delete_left(n_to_delete);
                 this.move_head_to_tail();
 
             } else if (n_to_delete < 0) {
-                this._buffer.delete_right(-n_to_delete);
+                this.buffer.delete_right(-n_to_delete);
                 this.move_tail_to_head();
             }
             this.free_tail();
@@ -391,8 +391,8 @@ export class Doc {
                 this.head.i_col += 1;
             }
         }
-        this._buffer.insert(text)
-        this.head.abs = this._buffer.gap_left;
+        this.buffer.insert(text)
+        this.head.abs = this.buffer.gap_left;
     }
 
     insert_new_line_above_head() {
