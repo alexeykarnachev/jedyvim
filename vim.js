@@ -3,7 +3,8 @@ import { is_printable } from "./keyboard_events.js";
 
 export const MODES = {
     normal: "normal",
-    insert: "insert"
+    insert: "insert",
+    visual: "visual",
 }
 
 export class Vim {
@@ -35,23 +36,23 @@ export class Vim {
         let mode = this.mode;
 
         if (key === "ArrowLeft") {
-            this.doc.move_cursor_left();
+            this.doc.move_head_left();
         } else if (key === "ArrowRight") {
-            this.doc.move_cursor_right();
+            this.doc.move_head_right();
         } else if (key === "ArrowUp") {
-            this.doc.move_cursor_up(this.i_col_max);
+            this.doc.move_head_up(this.i_col_max);
         } else if (key === "ArrowDown") {
-            this.doc.move_cursor_down(this.i_col_max);
+            this.doc.move_head_down(this.i_col_max);
         } else if (this.mode === MODES.normal && this.command.length === 1 && is_printable(key)) {
             let command = this.command[0];
             if (command === "f") {
-                this.doc.move_cursor_to_char_right(key, true, false);
+                this.doc.move_head_to_char_right(key, true, false);
             } else if (command === "F") {
-                this.doc.move_cursor_to_char_left(key, true, false);
+                this.doc.move_head_to_char_left(key, true, false);
             } else if (command === "t") {
-                this.doc.move_cursor_to_char_right(key, true, true);
+                this.doc.move_head_to_char_right(key, true, true);
             } else if (command === "T") {
-                this.doc.move_cursor_to_char_left(key, true, true);
+                this.doc.move_head_to_char_left(key, true, true);
             }
 
             if (command === "d" && key === "i") {
@@ -71,51 +72,54 @@ export class Vim {
                 || ["d"].includes(key)
             ) {
                 this.command.push(key);
+            } else if (key === "v") {
+                this.mode = MODES.visual; 
+                this.doc.fix_tail()
             } else if (key === "i") {
                 this.mode = MODES.insert;
             } else if (key === "I") {
-                this.doc.move_cursor_to_first_nonblank_char_in_line();
+                this.doc.move_head_to_first_nonblank_char_in_line();
                 this.mode = MODES.insert;
             } else if (key === "a") {
-                this.doc.move_cursor_right();
+                this.doc.move_head_right();
                 this.mode = MODES.insert;
             } else if (key === "A") {
-                this.doc.move_cursor_to_end_of_line();
+                this.doc.move_head_to_end_of_line();
                 this.mode = MODES.insert;
             } else if (key === "w") {
-                this.doc.move_cursor_word_right(false, true);
+                this.doc.move_head_word_right(false, true);
             } else if (key === "W") {
-                this.doc.move_cursor_word_right(false, false);
+                this.doc.move_head_word_right(false, false);
             } else if (key === "b") {
-                this.doc.move_cursor_word_left(false, true);
+                this.doc.move_head_word_left(false, true);
             } else if (key === "B") {
-                this.doc.move_cursor_word_left(false, false);
+                this.doc.move_head_word_left(false, false);
             } else if (key === "e") {
-                this.doc.move_cursor_word_end_right(false, true);
+                this.doc.move_head_word_end_right(false, true);
             } else if (key === "E") {
-                this.doc.move_cursor_word_end_right(false, false);
+                this.doc.move_head_word_end_right(false, false);
             } else if (key === "o") {
-                this.doc.insert_new_line_below_cursor();
+                this.doc.insert_new_line_below_head();
                 this.mode = MODES.insert;
             } else if (key === "O") {
-                this.doc.insert_new_line_above_cursor();
+                this.doc.insert_new_line_above_head();
                 this.mode = MODES.insert;
             } else if (key === "$") {
-                this.doc.move_cursor_to_end_of_line();
+                this.doc.move_head_to_end_of_line();
             } else if (key === "^") {
-                this.doc.move_cursor_to_first_nonblank_char_in_line();
+                this.doc.move_head_to_first_nonblank_char_in_line();
             } else if (key === "_") {
-                this.doc.move_cursor_to_first_nonblank_char_in_line();
+                this.doc.move_head_to_first_nonblank_char_in_line();
             } else if (key === "0") {
-                this.doc.move_cursor_to_beginning_of_line();
+                this.doc.move_head_to_beginning_of_line();
             } else if (key === "h") {
-                this.doc.move_cursor_left();
+                this.doc.move_head_left();
             } else if (key === "l") {
-                this.doc.move_cursor_right();
+                this.doc.move_head_right();
             } else if (key === "k") {
-                this.doc.move_cursor_up(this.i_col_max);
+                this.doc.move_head_up(this.i_col_max);
             } else if (key === "j") {
-                this.doc.move_cursor_down(this.i_col_max);
+                this.doc.move_head_down(this.i_col_max);
             }
         } else if (this.mode === MODES.insert) {
             if (is_printable(key)) {
@@ -124,16 +128,16 @@ export class Vim {
                 this.doc.insert_text("    ");
             } else if (key === "Escape") {
                 this.mode = MODES.normal;
-                this.doc.move_cursor_left();
+                this.doc.move_head_left();
             } else if (key === "Enter") {
                 this.doc.insert_text("\n");
             } else if (key === "Backspace") {
-                this.doc.delete_text();
+                this.doc.delete_char_left()
             }
         }
 
         if (this.mode !== MODES.insert && !this.doc.is_at_bol && this.doc.is_at_eol) {
-            this.doc.move_cursor_left();
+            this.doc.move_head_left();
         }
 
         if (
@@ -141,9 +145,9 @@ export class Vim {
             || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
             || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
         ) {
-            this.i_col_max = this.doc.cursor_pos.i_col;
+            this.i_col_max = this.doc.head.i_col;
         } else {
-            this.i_col_max = Math.max(this.i_col_max, this.doc.cursor_pos.i_col);
+            this.i_col_max = Math.max(this.i_col_max, this.doc.head.i_col);
         }
     }
 }

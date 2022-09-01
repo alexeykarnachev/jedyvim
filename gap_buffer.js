@@ -25,22 +25,28 @@ export class GapBuffer {
 
     move_left(n_steps = 1) {
         let pos = Math.max(0, this.gap_left - n_steps);
+        let n_steps_done = 0;
         while (pos < this.gap_left) {
             this.buffer[this.gap_right] = this.buffer[this.gap_left - 1];
             this.buffer[this.gap_left - 1] = null;
             this.gap_left -= 1;
             this.gap_right -= 1;
+            n_steps_done += 1;
         }
+        return n_steps_done;
     }
 
     move_right(n_steps = 1) {
         let pos = this.gap_left + n_steps;
+        let n_steps_done = 0;
         while (pos > this.gap_left && this.buffer[this.gap_right + 1] != null) {
             this.buffer[this.gap_left] = this.buffer[this.gap_right + 1];
             this.buffer[this.gap_right + 1] = null;
             this.gap_left += 1;
             this.gap_right += 1;
+            n_steps_done += 1;
         }
+        return n_steps_done;
     }
 
     move_to_pos(pos) {

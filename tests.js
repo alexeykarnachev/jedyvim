@@ -71,7 +71,7 @@ function run_test(test_case) {
 
     let actual_grid = doc.put_on_grid_with_word_wrapping(n_cols);
     let actual_output = actual_grid.lines;
-    let actual_cursor_pos = actual_grid.grid_cursor_pos;
+    let actual_cursor_pos = actual_grid.grid_head_pos;
     let actual_line_numbers = JSON.stringify(actual_grid.line_numbers);
     let results = []
 

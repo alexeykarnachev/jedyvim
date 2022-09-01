@@ -115,7 +115,7 @@ function get_doc_view(doc_on_grid, row_top, n_rows) {
         line_numbers: doc_on_grid.line_numbers.slice(row_top, row_bot + 1),
     };
 
-    let cursor_pos = doc_on_grid.grid_cursor_pos;
+    let cursor_pos = doc_on_grid.grid_head_pos;
     if (cursor_pos.i_row < row_top || cursor_pos.i_row > row_bot) {
         doc_view.grid_cursor_pos = null;
     } else {
@@ -129,15 +129,15 @@ function get_doc_view(doc_on_grid, row_top, n_rows) {
 function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
     let doc_on_grid = DOC.put_on_grid_with_word_wrapping(DOC_GRID.n_cols);
-    let grid_cursor_pos = doc_on_grid.grid_cursor_pos;
+    let grid_cursor_pos = doc_on_grid.grid_head_pos;
     if (grid_cursor_pos.i_row >= TOP_VIEW_ROW + DOC_GRID.n_rows) {
         TOP_VIEW_ROW = grid_cursor_pos.i_row - DOC_GRID.n_rows + 1;
     } else if (grid_cursor_pos.i_row < TOP_VIEW_ROW) {
         TOP_VIEW_ROW = grid_cursor_pos.i_row;
     }
 
-    let info_i_row = doc_on_grid.line_numbers[grid_cursor_pos.i_row];
-    let info_i_col = DOC.cursor_pos.i_col + 1;
+    let info_i_row = doc_on_grid.line_numbers[grid_cursor_pos.i_row] + 1;
+    let info_i_col = DOC.head.i_col + 1;
     let info_line = get_info_line(info_i_row, info_i_col, INFO_GRID.n_cols, VIM.mode, VIM.command);
     let doc_view = get_doc_view(doc_on_grid, TOP_VIEW_ROW, DOC_GRID.n_rows);
 
