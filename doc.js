@@ -14,6 +14,7 @@ export class Doc {
 
     free_tail() {
         this._tail_is_fixed = false;
+        this.move_tail_to_head();
     }
 
     move_tail_to_head() {
@@ -347,18 +348,16 @@ export class Doc {
     }
 
     delete_between_head_and_tail() {
-        if (this._tail_is_fixed) {
-            let n_to_delete = this.head.abs - this.tail.abs;
-            if (n_to_delete > 0) {
-                this.buffer.delete_left(n_to_delete);
-                this.move_head_to_tail();
+        let n_to_delete = this.head.abs - this.tail.abs;
+        if (n_to_delete > 0) {
+            this.buffer.delete_left(n_to_delete);
+            this.move_head_to_tail();
 
-            } else if (n_to_delete < 0) {
-                this.buffer.delete_right(-n_to_delete);
-                this.move_tail_to_head();
-            }
-            this.free_tail();
+        } else if (n_to_delete < 0) {
+            this.buffer.delete_right(-n_to_delete);
+            this.move_tail_to_head();
         }
+        this.free_tail();
     }
 
     delete_char_left() {
@@ -393,6 +392,7 @@ export class Doc {
         }
         this.buffer.insert(text)
         this.head.abs = this.buffer.gap_left;
+        this.move_tail_to_head();
     }
 
     insert_new_line_above_head() {

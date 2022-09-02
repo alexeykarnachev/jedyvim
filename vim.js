@@ -66,15 +66,22 @@ export class Vim {
                 this.doc.delete_word()
             }
             this.command = [];
-        } else if (this.mode === MODES.normal) {
+        } else if (this.mode !== MODES.insert) {
             if (
                 ["f", "t"].includes(key.toLowerCase())
                 || ["d"].includes(key)
             ) {
                 this.command.push(key);
             } else if (key === "v") {
-                this.mode = MODES.visual; 
-                this.doc.fix_tail()
+                if (this.mode === MODES.visual) {
+                    this.mode = MODES.normal;
+                    this.doc.free_tail();
+                } else if (this.mode === MODES.normal) {
+                    this.mode = MODES.visual;
+                    this.doc.fix_tail();
+                } else {
+                    throw("Unreachable")
+                }
             } else if (key === "i") {
                 this.mode = MODES.insert;
             } else if (key === "I") {

@@ -66,20 +66,23 @@ onresize();
 window.onresize = onresize;
 window.onkeydown = event => { VIM.onkeydown(event) };
 
+function fill_cursor() {
+    CONTEXT.fillStyle = CURSOR_COLOR;
+    let head_cell = DOC_GRID.get_cell_pos(DOC_VIEW.grid_cursor_pos.head_i_row, DOC_VIEW.grid_cursor_pos.head_i_col);
+    let tail_cell = DOC_GRID.get_cell_pos(DOC_VIEW.grid_cursor_pos.tail_i_row, DOC_VIEW.grid_cursor_pos.tail_i_col);
+    if (VIM.is_insert_mode()) {
+        CONTEXT.fillRect(head_cell.x, head_cell.y, EDIT_CURSOR_WIDTH, head_cell.h);
+        CONTEXT.fillRect(tail_cell.x, tail_cell.y, EDIT_CURSOR_WIDTH, tail_cell.h);
+    } else {
+        CONTEXT.fillRect(head_cell.x, head_cell.y, head_cell.w, head_cell.h);
+        CONTEXT.fillRect(tail_cell.x, tail_cell.y, tail_cell.w, tail_cell.h);
+    }
+}
 
 function draw() {
     CONTEXT.clearRect(0, 0, CANVAS.width, CANVAS.height);
     DOC_VIEW.update(VIM, DOC, DOC_GRID, INFO_GRID);
-
-    if (DOC_VIEW.grid_cursor_pos !== null) {
-        CONTEXT.fillStyle = CURSOR_COLOR;
-        let cursor_cell = DOC_GRID.get_cell_pos(DOC_VIEW.grid_cursor_pos.i_row, DOC_VIEW.grid_cursor_pos.i_col);
-        if (VIM.is_insert_mode()) {
-            CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, EDIT_CURSOR_WIDTH, cursor_cell.h);
-        } else {
-            CONTEXT.fillRect(cursor_cell.x, cursor_cell.y, cursor_cell.w, cursor_cell.h);
-        }
-    }
+    fill_cursor();
 
     for (let i_row = 0; i_row < DOC_VIEW.row_number_lines.length; ++i_row) {
         for (let i_col = 0; i_col < DOC_VIEW.row_number_lines[i_row].length; ++i_col) {
@@ -116,7 +119,7 @@ function draw() {
                 CONTEXT.arc(cell_pos.x + cell_pos.w * 0.5, cell_pos.y + cell_pos.h * 0.5, 2, 0, 2 * Math.PI);
                 CONTEXT.fill();
             } else {
-                if (!VIM.is_insert_mode() && DOC_VIEW.grid_cursor_pos.i_row === i_row && DOC_VIEW.grid_cursor_pos.i_col === i_col) {
+                if (!VIM.is_insert_mode() && DOC_VIEW.grid_cursor_pos.head_i_row === i_row && DOC_VIEW.grid_cursor_pos.head_i_col === i_col) {
                     CONTEXT.fillStyle = BACKGROUND_COLOR;
                 } else {
                     CONTEXT.fillStyle = TEXT_COLOR;
