@@ -336,6 +336,7 @@ export class Doc {
     select_word() {
         let left_n_steps = 0;
         let start_char = this.buffer.get_element_right_to_cursor();
+
         while (true) {
             let char = this.buffer.get_element_left_to_cursor(left_n_steps + 1);
             if (!is_same_type(start_char, char)) {
@@ -344,7 +345,7 @@ export class Doc {
             left_n_steps += 1
         }
 
-        let right_n_steps = 1;
+        let right_n_steps = 0;
         while (true) {
             let char = this.buffer.get_element_right_to_cursor(right_n_steps + 1);
             if (!is_same_type(start_char, char)) {
@@ -352,9 +353,12 @@ export class Doc {
             }
             right_n_steps += 1
         }
+        if (left_n_steps + right_n_steps < 1) {
+            return;
+        }
         this.move_cursor_left(left_n_steps, false);
         this.start_select();
-        this.move_cursor_right(right_n_steps + left_n_steps, false, true);
+        this.move_cursor_right(right_n_steps + left_n_steps - 1, false);
     }
 
     delete_select() {
@@ -362,9 +366,11 @@ export class Doc {
             console.log("CURSOR", this.cursor.abs, "TOP", this.select.top.abs, "BOT", this.select.bot.abs);
             throw ("[ERROR] Can't remove select since cursor position is not in the select boundary. It's a bug in the doc engine")
         }
-
+        if (!this.is_select_started) {
+            return;
+        }
         let left_n_steps = this.cursor.abs - this.select.top.abs;
-        let right_n_steps = this.select.bot.abs - this.cursor.abs;
+        let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;
         this.move_cursor_left(left_n_steps);
         this.buffer.delete_right(left_n_steps + right_n_steps);
         this.reset_select();
