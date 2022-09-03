@@ -5,6 +5,7 @@ export const MODES = {
     normal: "normal",
     insert: "insert",
     visual: "visual",
+    visual_line: "visual_line",
 }
 
 export class Vim {
@@ -41,8 +42,14 @@ export class Vim {
             this.doc.move_head_right();
         } else if (key === "ArrowUp") {
             this.doc.move_head_up(this.i_col_max);
+            if (this.mode === MODES.visual_line) {
+                this.doc.select_line();
+            }
         } else if (key === "ArrowDown") {
             this.doc.move_head_down(this.i_col_max);
+            if (this.mode === MODES.visual_line) {
+                this.doc.select_line();
+            }
         } else if (this.mode !== MODES.insert && this.command.length === 1 && is_printable(key)) {
             let command = this.command[0];
             if (command === "f") {
@@ -68,13 +75,17 @@ export class Vim {
             this.command = [];
         } else if (this.mode !== MODES.insert) {
             if (this.mode === MODES.visual) {
-                if (key === "Escape") {
-                    this.mode = MODES.normal;
-                } else if (key === "v") {
+                if (key === "v") {
                     this.mode = MODES.normal;
                 } else if (key === "d") {
                     this.doc.delete_between_head_and_tail();
                     this.doc.delete_char_right();
+                    this.mode = MODES.normal;
+                }
+            } else if (this.mode === MODES.visual_line) {
+                if (key === "v") {
+                    this.mode = MODES.visual;
+                } else if (key === "V") {
                     this.mode = MODES.normal;
                 }
             } else if (this.mode === MODES.normal) {
@@ -82,10 +93,16 @@ export class Vim {
                     this.command.push(key);
                 } else if (key === "v") {
                     this.mode = MODES.visual;
+                } else if (key === "V") {
+                    this.mode = MODES.visual_line;
+                    this.doc.move_tail_to_end_of_line();
+                    this.doc.move_head_to_beginning_of_line();
                 }
             }
 
-            if (["f", "t"].includes(key.toLowerCase())) {
+            if (key === "Escape") {
+                this.mode = MODES.normal;
+            } else if (["f", "t"].includes(key.toLowerCase())) {
                 this.command.push(key);
             } else if (key === "i" && this.mode === MODES.normal) {
                 this.mode = MODES.insert;
@@ -130,8 +147,14 @@ export class Vim {
                 this.doc.move_head_right();
             } else if (key === "k") {
                 this.doc.move_head_up(this.i_col_max);
+                if (this.mode === MODES.visual_line) {
+                    this.doc.select_line();
+                }
             } else if (key === "j") {
                 this.doc.move_head_down(this.i_col_max);
+                if (this.mode === MODES.visual_line) {
+                    this.doc.select_line();
+                }
             }
         } else if (this.mode === MODES.insert) {
             if (is_printable(key)) {
@@ -151,7 +174,7 @@ export class Vim {
         if (mode != this.mode) {
             if (this.mode === MODES.visual) {
                 this.doc.fix_tail()
-            } else {
+            } else if (this.mode !== MODES.visual_line) {
                 this.doc.free_tail();
             }
         }
@@ -172,6 +195,7 @@ export class Vim {
         } else {
             this.i_col_max = Math.max(this.i_col_max, this.doc.head.i_col);
         }
+
     }
 }
 

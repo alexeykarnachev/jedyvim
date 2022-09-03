@@ -120,9 +120,14 @@ function get_info_line(i_row, i_col, n_total_cols, mode, command) {
     } else if (mode === MODES.normal) {
         var mode_str = "";
         var command_str = command.join("");
-    } else {
+    } else if (mode === MODES.visual) {
         var mode_str = "-- VISUAL --";
         var command_str = command.join("");
+    } else if (mode === MODES.visual_line) {
+        var mode_str = "-- VISUAL LINE --";
+        var command_str = command.join("");
+    } else {
+        throw(`[ERROR] Unhandled mode: ${mode}. Please, implement the branch where error has occurred`)
     }
 
     let info = [

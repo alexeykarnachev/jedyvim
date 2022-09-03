@@ -322,6 +322,39 @@ export class Doc {
         this.move_head_left(n_steps);
     }
 
+    move_tail_to_end_of_line() {
+        for (let i = this.tail.abs; i < this.buffer.buffer.length; ++i) {
+            let char = this.buffer.get_element(i);
+            if (char === "\n" || char == null) {
+                let n_steps = i - this.tail.abs;
+                this.tail.abs += n_steps;
+                this.tail.i_col += n_steps;
+                break;
+            }
+        }
+        this.fix_tail();
+    }
+
+    move_tail_to_beginning_of_line() {
+        let n_steps = this.tail.i_col;
+        this.tail.i_col -= n_steps;
+        this.tail.abs -= n_steps;
+        this.fix_tail();
+    }
+
+    select_line() {
+        if (this.head.i_row < this.tail.i_row) {
+            this.move_head_to_beginning_of_line();
+            this.move_tail_to_end_of_line();
+        } else if (this.head.i_row > this.tail.i_row) {
+            this.move_head_to_end_of_line();
+            this.move_tail_to_beginning_of_line();
+        } else {
+            this.move_tail_to_end_of_line();
+            this.move_head_to_beginning_of_line();
+        }
+    }
+
     select_word() {
         this.move_tail_to_head();
         let left_n_steps = 0;
