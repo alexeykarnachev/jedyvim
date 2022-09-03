@@ -108,14 +108,14 @@ function draw_cursor() {
 }
 
 function draw_cells() {
+    let i_char = 0;
     for (let i_row = 0; i_row < DOC_VIEW.lines.length; ++i_row) {
-        let n_cols = DOC_VIEW.lines[i_row].length;
-        for (let i_col = 0; i_col < n_cols; ++i_col) {
-            let is_in_select = DOC_VIEW.is_in_select(i_row, i_col);
+        for (let i_col = 0; i_col < DOC_VIEW.lines[i_row].length; ++i_col) {
+            let is_in_select = DOC_VIEW.is_in_select(i_char);
             let cell_pos = DOC_GRID.get_cell_pos(i_row, i_col);
             let char = DOC_VIEW.lines[i_row][i_col];
 
-            if (is_in_select) {
+            if (DOC.is_select_started && is_in_select) {
                 CONTEXT.fillStyle = SELECT_COLOR;
                 CONTEXT.fillRect(cell_pos.x, cell_pos.y, cell_pos.w, cell_pos.h);
                 CONTEXT.fillStyle = BACKGROUND_COLOR;
@@ -135,6 +135,8 @@ function draw_cells() {
                 CONTEXT.textBaseline = "bottom";
                 CONTEXT.fillText(char, cell_pos.x + char_width_offset, cell_pos.y + cell_pos.h);
             }
+
+            i_char += 1;
         }
     }
 }
@@ -146,12 +148,11 @@ function draw() {
     draw_info_line();
     draw_cursor();
     draw_cells();
-
     requestAnimationFrame(draw);
 }
 
 async function main() {
-    // await run_tests(false);
+    await run_tests(false);
     requestAnimationFrame(draw);
 }
 

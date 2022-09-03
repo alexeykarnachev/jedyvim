@@ -183,8 +183,6 @@ export class Vim {
         } else {
             this.i_col_max = Math.max(this.i_col_max, this.doc.cursor.i_col);
         }
-
-        console.log(this.doc.select.top, this.doc.select.bot);
     }
 }
 

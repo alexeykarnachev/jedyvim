@@ -91,8 +91,8 @@ function run_test(test_case) {
         results.push({ name: test_case.name, code: 0, reason: "cursor position" });
     }
 
-    actual_output = actual_output.map(row => row.join("")).join("\n");
-    expected_output = expected_output.join("\n");
+    actual_output = actual_output.map(row => row.join("")).join("");
+    expected_output = expected_output.join("");
     if (actual_output !== expected_output) {
         results.push({ name: test_case.name, code: -1, reason: "text", actual: actual_output, expected: expected_output });
     } else {

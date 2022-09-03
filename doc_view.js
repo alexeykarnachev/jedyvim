@@ -43,8 +43,7 @@ export class DocView {
         this.row_number_lines = get_row_number_lines(line_numbers, this.doc_grid.n_rows);
     }
 
-    is_in_select(i_row, i_col) {
-        let i_char = this.doc_grid.n_cols * i_row + i_col;
+    is_in_select(i_char) {
         if (i_char >= this.grid_select_pos.top.i_char && i_char <= this.grid_select_pos.bot.i_char) {
             return true;
         }
@@ -127,10 +126,8 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
             break;
         }
 
-        if (char !== "\n") {
-            line.push(char)
-            i_col += 1;
-        }
+        line.push(char)
+        i_col += 1;
 
         if (i_col === n_cols || char === "\n") {
             line_numbers.push(line_number);
@@ -165,6 +162,5 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
 
     lines.push(line);
     line_numbers.push(line_number);
-
     return { lines: lines, line_numbers: line_numbers, grid_cursor_pos: grid_cursor_pos, grid_select_pos: grid_select_pos };
 }
