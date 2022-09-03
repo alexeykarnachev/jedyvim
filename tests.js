@@ -1,5 +1,6 @@
-import { Vim } from "./vim.js";
 import { Doc } from "./doc.js";
+import { put_on_grid_with_word_wrapping } from "./doc_view.js";
+import { Vim } from "./vim.js";
 
 
 export async function run_tests(throw_if_fail) {
@@ -69,9 +70,9 @@ function run_test(test_case) {
         }
     }
 
-    let actual_grid = doc.put_on_grid_with_word_wrapping(n_cols);
+    let actual_grid = put_on_grid_with_word_wrapping(doc, n_cols);
     let actual_output = actual_grid.lines;
-    let actual_cursor_pos = actual_grid.grid_head_pos;
+    let actual_cursor_pos = actual_grid.grid_cursor_pos;
     let actual_line_numbers = JSON.stringify(actual_grid.line_numbers);
     let results = []
 

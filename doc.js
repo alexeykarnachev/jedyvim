@@ -3,26 +3,19 @@ import { GapBuffer } from "./gap_buffer.js";
 export class Doc {
     constructor() {
         this.buffer = new GapBuffer(32);
-        this.head = { i_row: 0, i_col: 0, abs: 0 };
-        this.tail = { ...this.head };
-        this._tail_is_fixed = false;
+        this.cursor = { i_row: 0, i_col: 0, abs: 0 };
+        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.is_select_started = false;
     }
 
-    fix_tail() {
-        this._tail_is_fixed = true;
+    reset_select() {
+        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.is_select_started = false;
     }
 
-    free_tail() {
-        this._tail_is_fixed = false;
-        this.move_tail_to_head();
-    }
-
-    move_tail_to_head() {
-        this.tail = { ...this.head };
-    }
-
-    move_head_to_tail() {
-        this.head = { ...this.tail };
+    start_select() {
+        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.is_select_started = true;
     }
 
     get is_at_eol() {
@@ -107,119 +100,97 @@ export class Doc {
         );
     }
 
-    put_on_grid_with_word_wrapping(n_cols) {
-        let line = [];
-        let lines = [];
-        let line_numbers = [];
-        let line_number = 0;
-        let i_row = 0;
-        let i_col = 0;
-        let i_char = 0;
-        let grid_head_pos = { i_row: 0, i_col: 0 };
-        let grid_tail_pos = { i_row: 0, i_col: 0 };
-
-        while (true) {
-            let char = this.buffer.get_element(i_char);
-            if (char == null) {
-                break;
-            }
-
-            if (char !== "\n") {
-                line.push(char)
-                i_col += 1;
-            }
-
-            if (i_col === n_cols || char === "\n") {
-                line_numbers.push(line_number);
-                line_number += char === "\n";
-
-                lines.push(line);
-                line = [];
-                i_row += 1;
-                i_col = 0;
-            }
-
-
-            if (i_char === this.head.abs - 1) {
-                grid_head_pos.i_row = i_row;
-                grid_head_pos.i_col = i_col;
-            }
-
-            if (i_char === this.tail.abs - 1) {
-                grid_tail_pos.i_row = i_row;
-                grid_tail_pos.i_col = i_col;
-            }
-
-            i_char += 1;
-        }
-
-        lines.push(line);
-        line_numbers.push(line_number);
-        return { lines: lines, grid_head_pos: grid_head_pos, grid_tail_pos: grid_tail_pos, line_numbers: line_numbers };
-    }
-
-    move_head_left(n_steps = 1, stop_at_bol = true) {
+    move_cursor_left(n_steps = 1, stop_at_bol = true) {
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
                 break;
             }
 
+            let select_name = null;
+            if (this.is_select_started) {
+                if (this.select.top.abs === this.select.bot.abs) {
+                    select_name = "top";
+                } else if (this.cursor.abs === this.select.bot.abs) {
+                    select_name = "bot";
+                } else if (this.cursor.abs === this.select.top.abs) {
+                    select_name = "top";
+                } else {
+                    throw ("Can't move select when neither top bound nor bot bound doesn't stick to the cursor position. It's the doc engine bug")
+                }
+            }
+
             this.buffer.move_left();
+            this.cursor.abs -= 1;
             if (this.is_at_eol) {
-                this.head.i_col = this.current_line_length;
-                this.head.i_row -= 1;
+                this.cursor.i_col = this.current_line_length;
+                this.cursor.i_row -= 1;
             } else {
-                this.head.i_col -= 1;
+                this.cursor.i_col -= 1;
+            }
+
+            if (select_name !== null) {
+                this.select[select_name] = {...this.cursor};
             }
         }
-
-        this.head.abs = this.buffer.gap_left;
-        if (!this._tail_is_fixed) {
-            this.move_tail_to_head();
+        if (this.cursor.abs !== this.buffer.gap_left) {
+            throw (`Cursor pos is not equal to buffer pos (${this.cursor.abs} != ${this.buffer.gap_left}) after move_cursor_left select. It's the doc engine bug`)
         }
     }
 
-    move_head_right(n_steps = 1, stop_at_eol = true) {
+    move_cursor_right(n_steps = 1, stop_at_eol = true) {
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_eol && (stop_at_eol || this.is_at_eod)) {
                 break;
             }
 
+            let select_name = null;
+            if (this.is_select_started) {
+                if (this.select.top.abs === this.select.bot.abs) {
+                    select_name = "bot";
+                } else if (this.cursor.abs === this.select.bot.abs) {
+                    select_name = "bot";
+                } else if (this.cursor.abs === this.select.top.abs) {
+                    select_name = "top";
+                } else {
+                    throw ("Can't move select when neither top bound nor bot bound doesn't stick to the cursor position. It's the doc engine bug")
+                }
+            }
+
+            this.cursor.abs += 1;
             if (this.is_at_eol) {
-                this.head.i_col = 0;
-                this.head.i_row += 1;
+                this.cursor.i_col = 0;
+                this.cursor.i_row += 1;
             } else {
-                this.head.i_col += 1;
+                this.cursor.i_col += 1;
             }
             this.buffer.move_right();
+
+            if (select_name !== null) {
+                this.select[select_name] = {...this.cursor};
+            }
         }
-
-        this.head.abs = this.buffer.gap_left;
-        if (!this._tail_is_fixed) {
-            this.move_tail_to_head();
-        }
     }
 
-    move_head_up(i_col_max) {
-        this.move_head_to_beginning_of_line();
-        this.move_head_left(1, false);
-        this.move_head_to_beginning_of_line();
-        this.move_head_right(i_col_max);
+    move_cursor_up(i_col_max) {
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_left(1, false);
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_right(i_col_max);
     }
 
-    move_head_down(i_col_max) {
-        this.move_head_to_end_of_line();
-        this.move_head_right(1, false);
-        this.move_head_to_beginning_of_line();
-        this.move_head_right(i_col_max);
+    move_cursor_down(i_col_max) {
+        this.move_cursor_to_end_of_line();
+        this.move_cursor_right(1, false);
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_right(i_col_max);
     }
 
-    move_head_word_right(stop_at_eol, stop_at_keyword_char) {
+    move_cursor_word_right(stop_at_eol, stop_at_keyword_char) {
         do {
             if (stop_at_eol && this.is_at_eol) {
                 break;
             }
-            this.move_head_right(1, false);
+            this.move_cursor_right(1, false);
         } while (
             !this.is_at_eod
             && (
@@ -229,12 +200,12 @@ export class Doc {
         );
     }
 
-    move_head_word_left(stop_at_bol, stop_at_keyword_char) {
+    move_cursor_word_left(stop_at_bol, stop_at_keyword_char) {
         do {
             if (stop_at_bol && this.is_at_bol) {
                 break;
             }
-            this.move_head_left(1, false);
+            this.move_cursor_left(1, false);
         } while (
             !this.is_at_bod
             && (
@@ -244,12 +215,12 @@ export class Doc {
         )
     }
 
-    move_head_word_end_right(stop_at_eol, stop_at_keyword_char) {
+    move_cursor_word_end_right(stop_at_eol, stop_at_keyword_char) {
         do {
             if (stop_at_eol && this.is_at_eol) {
                 break;
             }
-            this.move_head_right(1, false);
+            this.move_cursor_right(1, false);
         } while (
             !this.is_at_eod
             && (
@@ -259,14 +230,14 @@ export class Doc {
         );
     }
 
-    move_head_to_first_nonblank_char_in_line() {
-        this.move_head_to_beginning_of_line();
+    move_cursor_to_first_nonblank_char_in_line() {
+        this.move_cursor_to_beginning_of_line();
         if (!is_nonblank(this.buffer.get_element_right_to_cursor())) {
-            this.move_head_word_right(true);
+            this.move_cursor_word_right(true);
         }
     }
 
-    move_head_to_char_right(target_char, stop_at_eol, stop_before_char) {
+    move_cursor_to_char_right(target_char, stop_at_eol, stop_before_char) {
         let i = this.buffer.gap_right + 2;
         let n_steps = stop_before_char ? 0 : 1;
         while (true) {
@@ -274,7 +245,7 @@ export class Doc {
             if (char == null || (stop_at_eol && is_newline(char))) {
                 return;
             } else if (char === target_char) {
-                this.move_head_right(n_steps, false);
+                this.move_cursor_right(n_steps, false);
                 return;
             } else {
                 n_steps += 1;
@@ -283,7 +254,7 @@ export class Doc {
         }
     }
 
-    move_head_to_char_left(target_char, stop_at_bol, stop_before_char) {
+    move_cursor_to_char_left(target_char, stop_at_bol, stop_before_char) {
         let i = this.buffer.gap_left - 1;
         let n_steps = stop_before_char ? 0 : 1;
         while (true) {
@@ -291,7 +262,7 @@ export class Doc {
             if (char == null || (stop_at_bol && is_newline(char))) {
                 return;
             } else if (char === target_char) {
-                this.move_head_left(n_steps, false);
+                this.move_cursor_left(n_steps, false);
                 return;
             } else {
                 n_steps += 1;
@@ -300,7 +271,7 @@ export class Doc {
         }
     }
 
-    move_head_to_end_of_line() {
+    get_n_steps_to_end_of_line() {
         let n_steps = 0;
         for (let i = this.buffer.gap_right + 1; i < this.buffer.buffer.length; ++i) {
             if (is_newline(this.buffer.buffer[i])) {
@@ -308,10 +279,10 @@ export class Doc {
             }
             n_steps += 1;
         }
-        this.move_head_right(n_steps);
+        return n_steps;
     }
 
-    move_head_to_beginning_of_line() {
+    get_n_steps_to_beginning_of_line() {
         let n_steps = 0;
         for (let i = this.buffer.gap_left - 1; i >= 0; --i) {
             if (this.buffer.buffer[i] === "\n") {
@@ -319,44 +290,50 @@ export class Doc {
             }
             n_steps += 1
         }
-        this.move_head_left(n_steps);
+        return n_steps;
     }
 
-    move_tail_to_end_of_line() {
-        for (let i = this.tail.abs; i < this.buffer.buffer.length; ++i) {
-            let char = this.buffer.get_element(i);
-            if (char === "\n" || char == null) {
-                let n_steps = i - this.tail.abs;
-                this.tail.abs += n_steps;
-                this.tail.i_col += n_steps;
-                break;
-            }
+    move_cursor_to_end_of_line() {
+        let n_steps = this.get_n_steps_to_end_of_line();
+        this.move_cursor_right(n_steps);
+    }
+
+    move_cursor_to_beginning_of_line() {
+        let n_steps = this.get_n_steps_to_beginning_of_line();
+        this.move_cursor_left(n_steps);
+    }
+
+    move_select_to_end_of_line(which) {
+        let n_steps = this.get_n_steps_to_end_of_line(this.select[which].abs);
+        this.select[which].i_row = this.cursor.i_row;
+        this.select[which].i_col += n_steps;
+        this.select[which].abs += n_steps;
+    }
+
+    move_select_to_beginning_of_line(which) {
+        let n_steps = this.get_n_steps_to_beginning_of_line(this.select[which].abs);
+        this.select[which].i_row = this.cursor.i_row;
+        this.select[which].i_col -= n_steps;
+        this.select[which].abs -= n_steps;
+        if (this.select[which].i_col !== 0 || this.select[which].abs < 0) {
+            throw (`[ERROR] incorrect select position: ${this.select[which]}. It's the doc engine bug`)
         }
-        this.fix_tail();
-    }
-
-    move_tail_to_beginning_of_line() {
-        let n_steps = this.tail.i_col;
-        this.tail.i_col -= n_steps;
-        this.tail.abs -= n_steps;
-        this.fix_tail();
     }
 
     select_line() {
-        if (this.head.i_row < this.tail.i_row) {
-            this.move_head_to_beginning_of_line();
-            this.move_tail_to_end_of_line();
-        } else if (this.head.i_row > this.tail.i_row) {
-            this.move_head_to_end_of_line();
-            this.move_tail_to_beginning_of_line();
+        if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
+            return;
+        } else if (this.cursor.i_row > this.select.bot.i_row) {
+            this.move_select_to_end_of_line("bot");
+        } else if (this.cursor.i_row < this.select.top.i_row) {
+            this.move_select_to_beginning_of_line("top");
         } else {
-            this.move_tail_to_end_of_line();
-            this.move_head_to_beginning_of_line();
+            this.move_select_to_beginning_of_line("top");
+            this.move_select_to_end_of_line("bot");
         }
     }
 
     select_word() {
-        this.move_tail_to_head();
         let left_n_steps = 0;
         let start_char = this.buffer.get_element_right_to_cursor();
         while (true) {
@@ -375,71 +352,66 @@ export class Doc {
             }
             right_n_steps += 1
         }
-        this.move_head_left(left_n_steps, false);
-        this.fix_tail()
-        this.move_head_right(right_n_steps + left_n_steps, false, true);
+        this.move_cursor_left(left_n_steps, false);
+        this.select.top = { ...this.cursor };
+        this.move_cursor_right(right_n_steps + left_n_steps, false, true);
+        this.select.bot = { ...this.cursor };
     }
 
-    delete_between_head_and_tail() {
-        let n_to_delete = this.head.abs - this.tail.abs;
-        if (n_to_delete > 0) {
-            this.buffer.delete_left(n_to_delete);
-            this.move_head_to_tail();
-
-        } else if (n_to_delete < 0) {
-            this.buffer.delete_right(-n_to_delete);
-            this.move_tail_to_head();
-        }
-        this.free_tail();
+    delete_select() {
+        this.reset_select();
     }
 
     delete_char_left() {
-        this.move_tail_to_head();
-        this.fix_tail();
-        this.move_head_left(1, false);
-        this.delete_between_head_and_tail();
-    }
+        if (this.is_at_bod) {
+            return;
+        }
 
-    delete_char_right() {
-        this.move_tail_to_head();
-        this.fix_tail();
-        this.move_head_right(1, false);
-        this.delete_between_head_and_tail();
+        this.buffer.delete_left();
+        this.cursor.abs -= 1;
+        if (this.is_at_eol) {
+            this.cursor.i_col = this.current_line_length;
+            this.cursor.i_row -= 1;
+        } else {
+            this.cursor.i_col -= 1;
+        }
+        this.reset_select();
     }
 
     delete_word() {
+        this.reset_select();
         this.select_word();
-        this.delete_between_head_and_tail();
+        this.delete_select();
     }
 
     insert_text(text) {
-        this.delete_between_head_and_tail();
+        this.delete_select();
 
         for (let i = 0; i < text.length; ++i) {
+            this.cursor.abs += 1;
             if (text[i] === "\n") {
-                this.head.i_row += 1;
-                this.head.i_col = 0;
+                this.cursor.i_row += 1;
+                this.cursor.i_col = 0;
             } else {
-                this.head.i_col += 1;
+                this.cursor.i_col += 1;
             }
         }
         this.buffer.insert(text)
-        this.head.abs = this.buffer.gap_left;
-        this.move_tail_to_head();
+        if (this.cursor.abs !== this.buffer.gap_left) {
+            throw (`Cursor pos is not equal to buffer pos (${this.cursor.abs} != ${this.buffer.gap_left}) after text insertion: "${text}". It's the doc engine bug`)
+        }
     }
 
-    insert_new_line_above_head() {
-        this.move_head_to_beginning_of_line();
+    insert_new_line_above_cursor() {
+        this.move_cursor_to_beginning_of_line();
         this.insert_text("\n");
-        this.move_head_left(1, false);
+        this.move_cursor_left(1, false);
     }
 
-    insert_new_line_below_head() {
-        this.move_head_to_end_of_line();
+    insert_new_line_below_cursor() {
+        this.move_cursor_to_end_of_line();
         this.insert_text("\n");
     }
-
-
 }
 
 function is_newline(char) {
