@@ -122,12 +122,11 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
 
     while (true) {
         let char = doc.buffer.get_element(i_char);
-        if (char == null) {
-            break;
-        }
-
-        line.push(char)
         i_col += 1;
+
+        if (char != null) {
+            line.push(char)
+        }
 
         if (i_col === n_cols || char === "\n") {
             line_numbers.push(line_number);
@@ -157,6 +156,9 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
             grid_select_pos.bot.i_char = i_char;
         }
 
+        if (char == null) {
+            break;
+        }
         i_char += 1;
     }
 

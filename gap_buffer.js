@@ -6,6 +6,11 @@ export class GapBuffer {
         this.buffer = new Array(gap_size);
     }
 
+    get n_elements() {
+        let gap_length = this.gap_right - this.gap_left + 1;
+        return this.buffer.length - gap_length;
+    }
+
     get_element(i) {
         if (i < this.gap_left) {
             return this.buffer[i];

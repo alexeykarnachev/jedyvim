@@ -6,16 +6,26 @@ export class Doc {
         this.cursor = { i_row: 0, i_col: 0, abs: 0 };
         this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.is_select_started = false;
+        this.is_select_line_started = false;
     }
 
-    reset_select() {
+    stop_select() {
         this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.is_select_started = false;
+        this.is_select_line_started = false;
     }
 
     start_select() {
         this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.is_select_started = true;
+        this.is_select_line_started = false;
+    }
+
+    start_select_line() {
+        this.move_select_to_beginning_of_line("top");
+        this.move_select_to_end_of_line("bot");
+        this.is_select_started = true;
+        this.is_select_line_started = true;
     }
 
     get is_at_eol() {
@@ -107,7 +117,7 @@ export class Doc {
             }
 
             let select_name = null;
-            if (this.is_select_started) {
+            if (this.is_select_started && !this.is_select_line_started) {
                 if (this.select.top.abs === this.select.bot.abs) {
                     select_name = "top";
                 } else if (this.cursor.abs === this.select.bot.abs) {
@@ -144,7 +154,7 @@ export class Doc {
             }
 
             let select_name = null;
-            if (this.is_select_started) {
+            if (this.is_select_started && !this.is_select_line_started) {
                 if (this.select.top.abs === this.select.bot.abs) {
                     select_name = "bot";
                 } else if (this.cursor.abs === this.select.bot.abs) {
@@ -172,17 +182,39 @@ export class Doc {
     }
 
     move_cursor_up(i_col_max) {
+        let i_row = this.cursor.i_row;
         this.move_cursor_to_beginning_of_line();
         this.move_cursor_left(1, false);
         this.move_cursor_to_beginning_of_line();
         this.move_cursor_right(i_col_max);
+        if (this.is_select_line_started && this.cursor.i_row < i_row) {
+            if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
+                this.move_select_to_end_of_line("bot");
+            } else if (this.cursor.i_row < this.select.top.i_row) {
+                this.move_select_to_beginning_of_line("top");
+            } else {
+                this.move_select_to_beginning_of_line("top");
+                this.move_select_to_end_of_line("bot");
+            }
+        }
     }
 
     move_cursor_down(i_col_max) {
+        let i_row = this.cursor.i_row;
         this.move_cursor_to_end_of_line();
         this.move_cursor_right(1, false);
         this.move_cursor_to_beginning_of_line();
         this.move_cursor_right(i_col_max);
+        if (this.is_select_line_started && this.cursor.i_row > i_row) {
+            if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
+                this.move_select_to_beginning_of_line("top");
+            } else if (this.cursor.i_row > this.select.bot.i_row) {
+                this.move_select_to_end_of_line("bot");
+            } else {
+                this.move_select_to_beginning_of_line("top");
+                this.move_select_to_end_of_line("bot");
+            }
+        }
     }
 
     move_cursor_word_right(stop_at_eol, stop_at_keyword_char) {
@@ -271,10 +303,13 @@ export class Doc {
         }
     }
 
-    get_n_steps_to_end_of_line() {
+    get_n_steps_to_end_of_line(from = null) {
         let n_steps = 0;
-        for (let i = this.buffer.gap_right + 1; i < this.buffer.buffer.length; ++i) {
-            if (is_newline(this.buffer.buffer[i])) {
+        if (from == null) {
+            from = this.buffer.gap_left;
+        }
+        for (let i = from; i < this.buffer.n_elements; ++i) {
+            if (is_newline(this.buffer.get_element(i))) {
                 break;
             }
             n_steps += 1;
@@ -282,10 +317,13 @@ export class Doc {
         return n_steps;
     }
 
-    get_n_steps_to_beginning_of_line() {
+    get_n_steps_to_beginning_of_line(from = null) {
         let n_steps = 0;
+        if (from == null) {
+            from = this.buffer.gap_left - 1;
+        }
         for (let i = this.buffer.gap_left - 1; i >= 0; --i) {
-            if (this.buffer.buffer[i] === "\n") {
+            if (this.buffer.get_element(i) === "\n") {
                 break;
             }
             n_steps += 1
@@ -304,33 +342,17 @@ export class Doc {
     }
 
     move_select_to_end_of_line(which) {
-        let n_steps = this.get_n_steps_to_end_of_line(this.select[which].abs);
+        let n_steps = this.get_n_steps_to_end_of_line();
         this.select[which].i_row = this.cursor.i_row;
-        this.select[which].i_col += n_steps;
-        this.select[which].abs += n_steps;
+        this.select[which].i_col = this.cursor.i_col + n_steps;
+        this.select[which].abs = this.cursor.abs + n_steps;
     }
 
     move_select_to_beginning_of_line(which) {
-        let n_steps = this.get_n_steps_to_beginning_of_line(this.select[which].abs);
+        let n_steps = this.get_n_steps_to_beginning_of_line();
         this.select[which].i_row = this.cursor.i_row;
-        this.select[which].i_col -= n_steps;
-        this.select[which].abs -= n_steps;
-        if (this.select[which].i_col !== 0 || this.select[which].abs < 0) {
-            throw (`[ERROR] incorrect select position: ${this.select[which]}. It's the doc engine bug`)
-        }
-    }
-
-    select_line() {
-        if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
-            return;
-        } else if (this.cursor.i_row > this.select.bot.i_row) {
-            this.move_select_to_end_of_line("bot");
-        } else if (this.cursor.i_row < this.select.top.i_row) {
-            this.move_select_to_beginning_of_line("top");
-        } else {
-            this.move_select_to_beginning_of_line("top");
-            this.move_select_to_end_of_line("bot");
-        }
+        this.select[which].i_col = 0;
+        this.select[which].abs = this.cursor.abs - n_steps;
     }
 
     select_word() {
@@ -363,7 +385,6 @@ export class Doc {
 
     delete_select() {
         if (this.cursor.abs < this.select.top.abs || this.cursor > this.select.bot.abs) {
-            console.log("CURSOR", this.cursor.abs, "TOP", this.select.top.abs, "BOT", this.select.bot.abs);
             throw ("[ERROR] Can't remove select since cursor position is not in the select boundary. It's a bug in the doc engine")
         }
         if (!this.is_select_started) {
@@ -373,7 +394,7 @@ export class Doc {
         let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;
         this.move_cursor_left(left_n_steps, false);
         this.buffer.delete_right(left_n_steps + right_n_steps);
-        this.reset_select();
+        this.stop_select();
     }
 
     delete_char_left() {
@@ -389,11 +410,11 @@ export class Doc {
         } else {
             this.cursor.i_col -= 1;
         }
-        this.reset_select();
+        this.stop_select();
     }
 
     delete_word() {
-        this.reset_select();
+        this.stop_select();
         this.select_word();
         this.delete_select();
     }
