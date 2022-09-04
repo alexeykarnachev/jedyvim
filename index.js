@@ -16,10 +16,12 @@ const FONT_SIZE = CELL_HEIGHT - 2;
 const FONT_STYLE = FONT_SIZE + "px SourceCodePro"
 
 const CURSOR_COLOR = "#e2d2aa";
-const SELECT_COLOR = "orange"; // "#e2d2aa";
+const SELECT_COLOR = "#d79921";
 const BACKGROUND_COLOR = "#202020";
 const SPACE_CIRCLE_COLOR = "#404040";
 const TEXT_COLOR = "#e2d2aa";
+const TEXT_IN_CURSOR_COLOR = "black";
+const SELECTED_TEXT_COLOR = "#504945";
 const ROW_NUMBER_COLOR = "#675d54";
 const INSERT_CURSOR_WIDTH = CELL_WIDTH * 0.2;
 CANVAS.style.backgroundColor = BACKGROUND_COLOR;
@@ -111,19 +113,25 @@ function draw_cells() {
     let i_char = 0;
     for (let i_row = 0; i_row < DOC_VIEW.lines.length; ++i_row) {
         for (let i_col = 0; i_col < DOC_VIEW.lines[i_row].length; ++i_col) {
-            let is_in_select = DOC_VIEW.is_in_select(i_char);
+            let is_in_select = DOC_VIEW.is_in_select(i_char) && DOC.is_select_started;
+            let is_in_cursor = DOC_VIEW.is_in_cursor(i_char);
             let cell_pos = DOC_GRID.get_cell_pos(i_row, i_col);
             let char = DOC_VIEW.lines[i_row][i_col];
 
-            if (DOC.is_select_started && is_in_select) {
+            if (is_in_select) {
                 CONTEXT.fillStyle = SELECT_COLOR;
                 CONTEXT.fillRect(cell_pos.x, cell_pos.y, cell_pos.w, cell_pos.h);
-                CONTEXT.fillStyle = BACKGROUND_COLOR;
+            }
+
+            if (is_in_cursor && !VIM.is_insert_mode) {
+                CONTEXT.fillStyle = TEXT_IN_CURSOR_COLOR;
+            } else if (is_in_select) {
+                CONTEXT.fillStyle = SELECTED_TEXT_COLOR;
             } else {
                 CONTEXT.fillStyle = TEXT_COLOR;
             }
 
-            if (char === " ") {
+            if (char === " " && !is_in_select) {
                 CONTEXT.fillStyle = SPACE_CIRCLE_COLOR;
                 CONTEXT.beginPath();
                 CONTEXT.arc(cell_pos.x + cell_pos.w * 0.5, cell_pos.y + cell_pos.h * 0.5, 2, 0, 2 * Math.PI);

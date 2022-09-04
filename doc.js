@@ -7,25 +7,44 @@ export class Doc {
         this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.is_select_started = false;
         this.is_select_line_started = false;
+        this.remembered_select = null;
     }
 
     stop_select() {
         this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.is_select_started = false;
         this.is_select_line_started = false;
+        this.remembered_select = null
     }
 
     start_select() {
-        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        if (this.remembered_select != null) {
+            this.restore_select();
+        } else {
+            this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        }
         this.is_select_started = true;
         this.is_select_line_started = false;
     }
 
     start_select_line() {
-        this.move_select_to_beginning_of_line("top");
-        this.move_select_to_end_of_line("bot");
+        this.remember_select();
+        this.move_select_to_beginning_of_line("top", !this.is_select_started);
+        this.move_select_to_end_of_line("bot", !this.is_select_started);
         this.is_select_started = true;
         this.is_select_line_started = true;
+    }
+
+    remember_select() {
+        this.remembered_select = structuredClone(this.select);
+    }
+
+    restore_select() {
+        if (this.remembered_select == null) {
+            throw ("Can't restore select, because it was not remembered");
+        }
+        this.select = this.remembered_select;
+        this.remembered_select = null;
     }
 
     get is_at_eol() {
@@ -110,24 +129,50 @@ export class Doc {
         );
     }
 
+    _get_cursor_select() {
+        if (this.is_select_started) {
+            if (this.is_select_line_started) {
+                if (this.remembered_select == null) {
+                    throw ("[ERROR] can't move remembered select since is't null. It's the doc engine bug");
+                }
+                return this.remembered_select;
+            } else {
+                return this.select;
+            }
+        }
+        return null;
+    }
+
+    _get_select_name(select, move_dir) {
+        let select_name = null;
+        if (select != null) {
+            if (select.top.abs === select.bot.abs) {
+                if (move_dir === "left") {
+                    select_name = "top";
+                } else if (move_dir === "right") {
+                    select_name = "bot";
+                } else {
+                    throw (`[ERROR] Unknown movement direction: ${move_dir}. It's the doc engine bug`)
+                }
+            } else if (this.cursor.abs === select.bot.abs) {
+                select_name = "bot";
+            } else if (this.cursor.abs === select.top.abs) {
+                select_name = "top";
+            } else {
+                throw ("[ERROR] Can't move select when neither top bound nor bot bound doesn't stick to the cursor position. It's the doc engine bug")
+            }
+        }
+        return select_name;
+    }
+
     move_cursor_left(n_steps = 1, stop_at_bol = true) {
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
                 break;
             }
 
-            let select_name = null;
-            if (this.is_select_started && !this.is_select_line_started) {
-                if (this.select.top.abs === this.select.bot.abs) {
-                    select_name = "top";
-                } else if (this.cursor.abs === this.select.bot.abs) {
-                    select_name = "bot";
-                } else if (this.cursor.abs === this.select.top.abs) {
-                    select_name = "top";
-                } else {
-                    throw ("Can't move select when neither top bound nor bot bound doesn't stick to the cursor position. It's the doc engine bug")
-                }
-            }
+            let select = this._get_cursor_select();
+            let select_name = this._get_select_name(select, "left");
 
             this.buffer.move_left();
             this.cursor.abs -= 1;
@@ -139,7 +184,7 @@ export class Doc {
             }
 
             if (select_name !== null) {
-                this.select[select_name] = { ...this.cursor };
+                select[select_name] = { ...this.cursor };
             }
         }
         if (this.cursor.abs !== this.buffer.gap_left) {
@@ -153,18 +198,8 @@ export class Doc {
                 break;
             }
 
-            let select_name = null;
-            if (this.is_select_started && !this.is_select_line_started) {
-                if (this.select.top.abs === this.select.bot.abs) {
-                    select_name = "bot";
-                } else if (this.cursor.abs === this.select.bot.abs) {
-                    select_name = "bot";
-                } else if (this.cursor.abs === this.select.top.abs) {
-                    select_name = "top";
-                } else {
-                    throw ("Can't move select when neither top bound nor bot bound doesn't stick to the cursor position. It's the doc engine bug")
-                }
-            }
+            let select = this._get_cursor_select();
+            let select_name = this._get_select_name(select, "right");
 
             this.cursor.abs += 1;
             if (this.is_at_eol) {
@@ -176,7 +211,7 @@ export class Doc {
             this.buffer.move_right();
 
             if (select_name !== null) {
-                this.select[select_name] = { ...this.cursor };
+                select[select_name] = { ...this.cursor };
             }
         }
     }
@@ -341,18 +376,30 @@ export class Doc {
         this.move_cursor_left(n_steps);
     }
 
-    move_select_to_end_of_line(which) {
-        let n_steps = this.get_n_steps_to_end_of_line();
-        this.select[which].i_row = this.cursor.i_row;
-        this.select[which].i_col = this.cursor.i_col + n_steps;
-        this.select[which].abs = this.cursor.abs + n_steps;
+    move_select_to_end_of_line(which, at_cursor_line = true) {
+        if (at_cursor_line) {
+            var n_steps = this.get_n_steps_to_end_of_line();
+            this.select[which].i_row = this.cursor.i_row;
+            this.select[which].i_col = this.cursor.i_col + n_steps;
+            this.select[which].abs = this.cursor.abs + n_steps;
+
+        } else {
+            var n_steps = this.get_n_steps_to_end_of_line(this.select[which].abs);
+            this.select[which].i_col = this.select[which].i_col + n_steps;
+            this.select[which].abs = this.select[which].abs + n_steps;
+        }
     }
 
-    move_select_to_beginning_of_line(which) {
-        let n_steps = this.get_n_steps_to_beginning_of_line();
-        this.select[which].i_row = this.cursor.i_row;
+    move_select_to_beginning_of_line(which, at_cursor_line = true) {
+        if (at_cursor_line) {
+            var n_steps = this.get_n_steps_to_beginning_of_line();
+            this.select[which].i_row = this.cursor.i_row;
+            this.select[which].abs = this.cursor.abs - n_steps;
+        } else {
+            var n_steps = this.get_n_steps_to_beginning_of_line(this.select[which].abs);
+            this.select[which].abs = this.select[which].abs - n_steps;
+        }
         this.select[which].i_col = 0;
-        this.select[which].abs = this.cursor.abs - n_steps;
     }
 
     select_word() {

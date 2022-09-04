@@ -124,6 +124,9 @@ export class Vim {
                 } else if (key === "d") {
                     this.doc.delete_select();
                     this.mode = MODES.normal;
+                } else if (key === "V") {
+                    this.doc.start_select_line();
+                    this.mode = MODES.visual_line;
                 }
             } else if (this.mode === MODES.visual_line) {
                 if (key === "v") {
@@ -163,17 +166,17 @@ export class Vim {
             }
         }
 
-        if (this.mode !== MODES.insert && !this.doc.is_at_bol && this.doc.is_at_eol) {
+        if (this.mode === MODES.normal && !this.doc.is_at_bol && this.doc.is_at_eol) {
             this.doc.move_cursor_left();
         }
 
         if (
-            (this.mode !== MODES.visual) &&
-            (
+            // (this.mode !== MODES.visual) &&
+            // (
                 (mode != this.mode)
                 || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
                 || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
-            )
+            // )
         ) {
             this.i_col_max = this.doc.cursor.i_col;
         } else {

@@ -50,8 +50,8 @@ export class DocView {
         return false;
     }
 
-    is_in_cursor(i_row, i_col) {
-        if (i_row === this.grid_cursor_pos.i_row && i_col === this.grid_cursor_pos.i_col) {
+    is_in_cursor(i_char) {
+        if (i_char === this.grid_cursor_pos.i_char) {
             return true;
         }
         return false;
@@ -141,7 +141,7 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
         if (i_char === doc.cursor.abs - 1) {
             grid_cursor_pos.i_row = i_row;
             grid_cursor_pos.i_col = i_col;
-            grid_cursor_pos.i_char = i_char;
+            grid_cursor_pos.i_char = i_char + 1;
         }
 
         if (i_char === doc.select.top.abs) {
