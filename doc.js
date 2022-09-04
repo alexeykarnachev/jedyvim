@@ -29,7 +29,7 @@ export class Doc {
 
     start_select_line() {
         this.remember_select();
-        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.select = structuredClone(this.remembered_select);
         this.span_select_on_line(!this.is_select_started);
         this.is_select_started = true;
         this.is_select_line_started = true;
