@@ -74,12 +74,17 @@ export class Vim {
                 this.mode = MODES.insert;
             } else if (key === "I") {
                 this.doc.move_cursor_to_first_nonblank_char_in_line();
+                this.doc.stop_select();
                 this.mode = MODES.insert;
-            } else if (key === "a") {
+            } else if (key === "a" && this.mode === MODES.normal) {
                 this.doc.move_cursor_right();
                 this.mode = MODES.insert;
-            } else if (key === "A") {
+            } else if (key === "A" && this.mode === MODES.normal) {
                 this.doc.move_cursor_to_end_of_line();
+                this.mode = MODES.insert;
+            } else if (key === "A" && this.mode !== MODES.normal) {
+                this.doc.move_cursor_right();
+                this.doc.stop_select();
                 this.mode = MODES.insert;
             } else if (key === "w") {
                 this.doc.move_cursor_word_right(false, true);
@@ -93,12 +98,14 @@ export class Vim {
                 this.doc.move_cursor_word_end_right(false, true);
             } else if (key === "E") {
                 this.doc.move_cursor_word_end_right(false, false);
-            } else if (key === "o") {
+            } else if (key === "o" && this.mode === MODES.normal) {
                 this.doc.insert_new_line_below_cursor();
                 this.mode = MODES.insert;
-            } else if (key === "O") {
+            } else if (key === "O" && this.mode === MODES.normal) {
                 this.doc.insert_new_line_above_cursor();
                 this.mode = MODES.insert;
+            } else if (["o", "O"].includes(key) && this.mode !== MODES.normal) {
+                this.doc.move_cursor_to_opposite_select_side();
             } else if (key === "$") {
                 this.doc.move_cursor_to_end_of_line();
             } else if (key === "^") {
@@ -172,7 +179,7 @@ export class Vim {
         if (
             // (this.mode !== MODES.visual) &&
             // (
-                (mode != this.mode)
+                (mode !== this.mode)
                 || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
                 || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
             // )

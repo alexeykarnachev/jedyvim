@@ -4,14 +4,14 @@ export class Doc {
     constructor() {
         this.buffer = new GapBuffer(32);
         this.cursor = { i_row: 0, i_col: 0, abs: 0 };
-        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.select = null;
         this.is_select_started = false;
         this.is_select_line_started = false;
         this.remembered_select = null;
     }
 
     stop_select() {
-        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        this.select = null;
         this.is_select_started = false;
         this.is_select_line_started = false;
         this.remembered_select = null
@@ -29,6 +29,7 @@ export class Doc {
 
     start_select_line() {
         this.remember_select();
+        this.select = { top: { ...this.cursor }, bot: { ...this.cursor } };
         this.span_select_on_line(!this.is_select_started);
         this.is_select_started = true;
         this.is_select_line_started = true;
@@ -40,12 +41,16 @@ export class Doc {
     }
 
     remember_select() {
-        this.remembered_select = structuredClone(this.select);
+        if (this.select != null) {
+            this.remembered_select = structuredClone(this.select);
+        } else {
+            this.remembered_select = { top: { ...this.cursor }, bot: { ...this.cursor } };
+        }
     }
 
     restore_select() {
         if (this.remembered_select == null) {
-            throw ("Can't restore select, because it was not remembered");
+            throw ("[ERROR] Can't restore select, because it was not remembered. It could be a bug on the caller side or on the doc engine side");
         }
         this.select = this.remembered_select;
         this.remembered_select = null;
@@ -169,7 +174,7 @@ export class Doc {
         return select_name;
     }
 
-    move_cursor_left(n_steps = 1, stop_at_bol = true) {
+    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select=true) {
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
@@ -193,7 +198,7 @@ export class Doc {
             }
         }
 
-        if (this.is_select_line_started && this.cursor.i_row < i_row) {
+        if (affect_line_select && this.is_select_line_started && this.cursor.i_row < i_row) {
             if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
                 this.move_select_to_end_of_line("bot");
             } else if (this.cursor.i_row < this.select.top.i_row) {
@@ -209,7 +214,7 @@ export class Doc {
         }
     }
 
-    move_cursor_right(n_steps = 1, stop_at_eol = true) {
+    move_cursor_right(n_steps = 1, stop_at_eol = true, affect_line_select = true) {
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_eol && (stop_at_eol || this.is_at_eod)) {
@@ -233,7 +238,7 @@ export class Doc {
             }
         }
 
-        if (this.is_select_line_started && this.cursor.i_row > i_row) {
+        if (affect_line_select && this.is_select_line_started && this.cursor.i_row > i_row) {
             if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
                 this.move_select_to_beginning_of_line("top");
             } else if (this.cursor.i_row > this.select.bot.i_row) {
@@ -349,6 +354,25 @@ export class Doc {
         }
     }
 
+    move_cursor_to_opposite_select_side() {
+        if (!this.is_select_started) {
+            throw ("[ERROR] Can't move cursor to the opposite select side while the selection mode is not started. Maybe it's a bug on the caller side")
+        }
+        let select = this._get_cursor_select();
+
+        if (select.top.abs === this.cursor.abs) {
+            let tmp_select = {...select.top};
+            this.move_cursor_right(select.bot.abs - this.cursor.abs, false, false);
+            select.top = tmp_select;
+        } else if (select.bot.abs === this.cursor.abs) {
+            let tmp_select = {...select.bot};
+            this.move_cursor_left(this.cursor.abs - select.top.abs, false, false);
+            select.bot = tmp_select;
+        } else {
+            throw ("[ERROR] Can't move cursor to the opposite select side since the cursor is not sticked to neither select top nor select bot. It's the doc engine bug")
+        }
+    }
+
     get_n_steps_to_end_of_line(from = null) {
         let n_steps = 0;
         if (from == null) {
@@ -442,11 +466,11 @@ export class Doc {
     }
 
     delete_select() {
-        if (this.cursor.abs < this.select.top.abs || this.cursor > this.select.bot.abs) {
-            throw ("[ERROR] Can't remove select since cursor position is not in the select boundary. It's a bug in the doc engine")
-        }
         if (!this.is_select_started) {
             return;
+        }
+        if (this.cursor.abs < this.select.top.abs || this.cursor > this.select.bot.abs) {
+            throw ("[ERROR] Can't remove select since cursor position is not in the select boundary. It's a bug in the doc engine")
         }
         let left_n_steps = this.cursor.abs - this.select.top.abs;
         let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;

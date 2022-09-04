@@ -144,13 +144,13 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
             grid_cursor_pos.i_char = i_char + 1;
         }
 
-        if (i_char === doc.select.top.abs) {
+        if (doc.select != null && i_char === doc.select.top.abs) {
             grid_select_pos.top.i_row = i_row;
             grid_select_pos.top.i_col = i_col;
             grid_select_pos.top.i_char = i_char;
         }
 
-        if (i_char === doc.select.bot.abs) {
+        if (doc.select != null && i_char === doc.select.bot.abs) {
             grid_select_pos.bot.i_row = i_row;
             grid_select_pos.bot.i_col = i_col;
             grid_select_pos.bot.i_char = i_char;
