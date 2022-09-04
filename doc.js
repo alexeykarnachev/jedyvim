@@ -371,7 +371,7 @@ export class Doc {
         }
         let left_n_steps = this.cursor.abs - this.select.top.abs;
         let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;
-        this.move_cursor_left(left_n_steps);
+        this.move_cursor_left(left_n_steps, false);
         this.buffer.delete_right(left_n_steps + right_n_steps);
         this.reset_select();
     }

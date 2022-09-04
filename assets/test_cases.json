@@ -90,10 +90,10 @@
     {
         "name": "delete_word_1",
         "input": ["i", "1", "2", "3", " ", "^", "^", "^", " ", "4", "5", "6", ["Escape"], "d", "i", "w", "v", "d", "O", "4", "5", "6", " ", "^", "^", "^", ["Escape"], "d", "i", "w", "v", "d", "a", "-", "-", "-", "-", ["Enter"], ["Escape"], "d", "i", "w", "v", "d", "v", "l", "l", "l", "l", "l", "d", "i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Escape"], "l", "v", "d", "k", "v", "h", "h", "h", "h", "h", "h", "d", "j", "i", ["Escape"], "k", "v", "d", "v", "l", "l", "l", "l", "l", "l", "d", "l", "l", "l", "l", "l", "v", "d"],
-        "output": ["Hello\n", ",,,--\n", "\n", "World!"],
+        "output": ["world"],
         "n_cols": 100,
-        "cursor_pos": {"i_row": 2, "i_col": 0},
-        "line_numbers": [0, 1, 2, 3] 
+        "cursor_pos": {"i_row": 0, "i_col": 4},
+        "line_numbers": [0] 
     },
     {
         "name": "find_char_0",
@@ -113,7 +113,7 @@
     },
     {
         "name": "visual_delete_0",
-        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "W", "o", "r", "l", "d", "!", ["Escape"], "h", "h", "h", "h", "h", "v", "d", "i", "w", ["Escape"], "h", "h", "v", "d", "A", ["Escape"], "v", "d", ":", "w", "q", ["Enter"]],
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "W", "o", "r", "l", "d", "!", ["Escape"], "h", "h", "h", "h", "h", "v", "d", "i", "w", ["Escape"], "h", "h", "v", "d", "A", ["Escape"], "v", "d"],
         "output": ["Hello world"],
         "n_cols": 100,
         "cursor_pos": {"i_row": 0, "i_col": 10},
@@ -121,7 +121,7 @@
     },
     {
         "name": "visual_delete_1",
-        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], "H", "e", "l", "l", "o", ",", "|", "|", "|", "|", "|", ["Escape"], "v", "h", "h", "h", "h", "h", "d", "a", ",", " ", "w", "o", "r", "l", "d", "!", ["Escape"], "v", "k", "d", "v", "h", "h", "h", "h", "h", "h", "d", ":", "w", "q", ["Enter"]],
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], "H", "e", "l", "l", "o", ",", "|", "|", "|", "|", "|", ["Escape"], "v", "h", "h", "h", "h", "h", "d", "a", ",", " ", "w", "o", "r", "l", "d", "!", ["Escape"], "v", "k", "d", "v", "h", "h", "h", "h", "h", "h", "d"],
         "output": ["Hello"],
         "n_cols": 100,
         "cursor_pos": {"i_row": 0, "i_col": 4},
@@ -137,10 +137,18 @@
     },
     {
         "name": "visual_delete_3",
-        "input": ["i", "a", "a", ["Escape"], "o", ["Enter"], "a", ["Escape"], "k", "k", "v", "j", "j", "d", ":", "w", "q", ["Enter"]],
+        "input": ["i", "a", "a", ["Escape"], "o", ["Enter"], "a", ["Escape"], "k", "k", "v", "j", "j", "d"],
         "output": [""],
         "n_cols": 100,
         "cursor_pos": {"i_row": 0, "i_col": 0},
         "line_numbers":[0]
+    },
+    {
+        "name": "visual_delete_4",
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", "\"", ["Escape"], "b", "b", "i", "\"", ["Escape"], "b", "a", ["Enter"], ["Escape"], "v", "d", "O", ["Escape"], "v", "d", "a", "H", "e", "l", "l", "o", ",", " ", ["Escape"], "O", ["Escape"], "v", "k", "d", "v", "w", "w", "d", "a", "\"", ["Escape"], "b", "i", "+", ["Escape"], "b", "O", "H", "e", "l", "l", "o", "!", ["Escape"], "v", "j", "l", "d", "v", "_", "d", "i", "H", "e", "l", "l", "o", ["Escape"], "v", "$", "d", "a", "o", " ", " ", " ", " ", " ", " ", " ", ["Enter"], "W", "O", "R", "L", "D", "!", ["Escape"], "k", "v", "0", "d", "A", "H", "E", "L", "L", "O", " ", " ", " ", " ", " ", " ", " ", ["Escape"], "O", "W", "O", "R", "L", "D", "!", " ", "^", "^", "^", "^", "_", "_", "_", "_", ".", ".", ".", "-", "-", "-", "-", ["Escape"], "v", "b", "B", "d", "a", "H", "E", "L", "L", "O", "^", "^", "^", "_", "_", "_", ".", ".", "A", "B", "C", "!", ["Escape"], "v", "b", "b", "b", "b", "b", "W", "d"],
+        "output": ["WORLD! HELLO^^^___..ABCELLO       \n", "WORLD!"],
+        "n_cols": 100,
+        "cursor_pos": {"i_row": 0, "i_col": 23},
+        "line_numbers":[0, 1]
     }
 ]
