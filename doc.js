@@ -411,16 +411,6 @@ export class Doc {
         this.move_cursor_left(n_steps);
     }
 
-    move_cursor_to_beginning_of_select() {
-        if (this.is_select_started) {
-            var n_steps = this.cursor.abs - this.select.top.abs;
-        } else {
-            throw ("Can't move cursor to beginning of select since the select is not started. It's a bug on the caller side or in the doc engine")
-        }
-
-        this.move_cursor_left(n_steps, false, false);
-    }
-
     move_select_to_end_of_line(which, at_cursor_line = true) {
         if (at_cursor_line) {
             var n_steps = this.get_n_steps_to_end_of_line();

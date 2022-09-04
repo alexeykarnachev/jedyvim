@@ -164,12 +164,5 @@
         "output": ["ho, !"],
         "cursor_pos": {"i_row": 0, "i_col": 1},
         "line_numbers": [0]
-    },
-    {
-        "name": "visual_line_2",
-        "input": ["I", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Escape"], "V", "h", "h", "h", "h", "h", "v", "v", "i", ["Enter"], ["Escape"], "v", "l", "l", "l", "l", "V", "o", "o", "h", "v", "v", "v", "d", "O", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", "!", "!", ["Escape"], "h", "h", "h", "h", "h", "v", "h", "h", "h", "h", "h", "h", "h", "o", "v", "a", ["Enter"], ["Escape"], "l", "l", "v", "k", "V", "k", "l", "v", "d", "v", "j", "V", "I", "W", "O", "R", "L", "D", "!", " ", ["Escape"]],
-        "output": ["WORLD! Hel!!\n", "word!"],
-        "cursor_pos": {"i_row": 0, "i_col": 6},
-        "line_numbers": [0, 1]
     }
 ]

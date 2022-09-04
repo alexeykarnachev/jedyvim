@@ -76,11 +76,6 @@ export class Vim {
                 this.doc.move_cursor_to_first_nonblank_char_in_line();
                 this.doc.stop_select();
                 this.mode = MODES.insert;
-            } else if (key === "I" && this.mode !== MODES.normal) {
-                this.doc.move_cursor_to_beginning_of_select();
-                this.doc.move_cursor_to_first_nonblank_char_in_line();
-                this.doc.stop_select();
-                this.mode = MODES.insert;
             } else if (key === "a" && this.mode === MODES.normal) {
                 this.doc.move_cursor_right();
                 this.mode = MODES.insert;
@@ -133,7 +128,7 @@ export class Vim {
                 if (["v", "Escape"].includes(key)) {
                     this.doc.stop_select();
                     this.mode = MODES.normal;
-                } else if (key === "d") {
+                } else if (["d", "x"].includes(key.toLowerCase())) {
                     this.doc.delete_select();
                     this.mode = MODES.normal;
                 } else if (key === "V") {
@@ -147,7 +142,7 @@ export class Vim {
                 } else if (["V", "Escape"].includes(key)) {
                     this.doc.stop_select();
                     this.mode = MODES.normal;
-                } else if (key === "d") {
+                } else if (["d", "x"].includes(key.toLowerCase())) {
                     this.doc.delete_select();
                     this.mode = MODES.normal;
                 }
