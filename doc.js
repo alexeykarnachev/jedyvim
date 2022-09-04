@@ -29,10 +29,14 @@ export class Doc {
 
     start_select_line() {
         this.remember_select();
-        this.move_select_to_beginning_of_line("top", !this.is_select_started);
-        this.move_select_to_end_of_line("bot", !this.is_select_started);
+        this.span_select_on_line(!this.is_select_started);
         this.is_select_started = true;
         this.is_select_line_started = true;
+    }
+
+    span_select_on_line(at_cursor_line) {
+        this.move_select_to_beginning_of_line("top", at_cursor_line);
+        this.move_select_to_end_of_line("bot", at_cursor_line);
     }
 
     remember_select() {
@@ -166,6 +170,7 @@ export class Doc {
     }
 
     move_cursor_left(n_steps = 1, stop_at_bol = true) {
+        let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
                 break;
@@ -187,12 +192,25 @@ export class Doc {
                 select[select_name] = { ...this.cursor };
             }
         }
+
+        if (this.is_select_line_started && this.cursor.i_row < i_row) {
+            if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
+                this.move_select_to_end_of_line("bot");
+            } else if (this.cursor.i_row < this.select.top.i_row) {
+                this.move_select_to_beginning_of_line("top");
+            } else {
+                this.move_select_to_beginning_of_line("top");
+                this.move_select_to_end_of_line("bot");
+            }
+        }
+
         if (this.cursor.abs !== this.buffer.gap_left) {
             throw (`Cursor pos is not equal to buffer pos (${this.cursor.abs} != ${this.buffer.gap_left}) after move_cursor_left select. It's the doc engine bug`)
         }
     }
 
     move_cursor_right(n_steps = 1, stop_at_eol = true) {
+        let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_eol && (stop_at_eol || this.is_at_eod)) {
                 break;
@@ -214,32 +232,7 @@ export class Doc {
                 select[select_name] = { ...this.cursor };
             }
         }
-    }
 
-    move_cursor_up(i_col_max) {
-        let i_row = this.cursor.i_row;
-        this.move_cursor_to_beginning_of_line();
-        this.move_cursor_left(1, false);
-        this.move_cursor_to_beginning_of_line();
-        this.move_cursor_right(i_col_max);
-        if (this.is_select_line_started && this.cursor.i_row < i_row) {
-            if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
-                this.move_select_to_end_of_line("bot");
-            } else if (this.cursor.i_row < this.select.top.i_row) {
-                this.move_select_to_beginning_of_line("top");
-            } else {
-                this.move_select_to_beginning_of_line("top");
-                this.move_select_to_end_of_line("bot");
-            }
-        }
-    }
-
-    move_cursor_down(i_col_max) {
-        let i_row = this.cursor.i_row;
-        this.move_cursor_to_end_of_line();
-        this.move_cursor_right(1, false);
-        this.move_cursor_to_beginning_of_line();
-        this.move_cursor_right(i_col_max);
         if (this.is_select_line_started && this.cursor.i_row > i_row) {
             if (this.cursor.i_row > this.select.top.i_row && this.cursor.i_row < this.select.bot.i_row) {
                 this.move_select_to_beginning_of_line("top");
@@ -250,6 +243,24 @@ export class Doc {
                 this.move_select_to_end_of_line("bot");
             }
         }
+
+        if (this.cursor.abs !== this.buffer.gap_left) {
+            throw (`Cursor pos is not equal to buffer pos (${this.cursor.abs} != ${this.buffer.gap_left}) after move_cursor_left select. It's the doc engine bug`)
+        }
+    }
+
+    move_cursor_up(i_col_max) {
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_left(1, false);
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_right(i_col_max);
+    }
+
+    move_cursor_down(i_col_max) {
+        this.move_cursor_to_end_of_line();
+        this.move_cursor_right(1, false);
+        this.move_cursor_to_beginning_of_line();
+        this.move_cursor_right(i_col_max);
     }
 
     move_cursor_word_right(stop_at_eol, stop_at_keyword_char) {

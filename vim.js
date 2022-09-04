@@ -150,7 +150,6 @@ export class Vim {
                     this.mode = MODES.visual_line;
                 }
             }
-
         } else if (this.mode === MODES.insert) {
             if (is_printable(key)) {
                 this.doc.insert_text(key);
