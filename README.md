@@ -3,20 +3,7 @@
 ## Demo
 https://alexeykarnachev.github.io/jedyvim/
 
-## Added
-- Basic typing and text editing (SPACE, RETURN, BACKSPACE, TAB, etc)
-- Normal/Insert modes switch (ESC)
-- Standard navigation with arrows
-- Normal mode:
-    - `h`, `j`, `k`, `l` - keys movement
-    - `i` - switch to insert mode (insert-style)
-    - `I` - insert at the first non-whitespace at the line
-    - `a` - switch to insert mode (append-style)
-    - `A` - append at the end of the line
-    - `w` - move to the beginning of the next word
-    - `b` - move to the beginning of the word (current of previous)
-    - `e` - move to the end of the word
-    - `o` - insert new line below
-    - `O` - insert new line above
-    - `$` - move to the end of line
-    - `^`, `_` - move to the first non-whitespace character in the line
+## Current State
+- Basic typing text editing and navigation
+- `NORMAL`, `INSERT`, `VISUAL`, `VISUAL LINE` modes
+- Full commands list is not implemented yet. But most basic commands are supported: `h`, `j`, `k`, `l` navigation, word forward-backward `w`, `W`, `b`, `B`, `e`, `E` navigation. In `VISUAL` mode one can delete selected lines `d`, `x`. Also, `VISUAL` mode supports words backward-forward navigation as well as lines-border jumps: `_`, `0`, `$`
