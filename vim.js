@@ -72,7 +72,12 @@ export class Vim {
                 this.command.push(key);
             } else if (key === "i" && this.mode === MODES.normal) {
                 this.mode = MODES.insert;
-            } else if (key === "I") {
+            } else if (key === "I" && this.mode === MODES.normal) {
+                this.doc.move_cursor_to_first_nonblank_char_in_line();
+                this.doc.stop_select();
+                this.mode = MODES.insert;
+            } else if (key === "I" && this.mode !== MODES.normal) {
+                this.doc.move_cursor_to_beginning_of_select();
                 this.doc.move_cursor_to_first_nonblank_char_in_line();
                 this.doc.stop_select();
                 this.mode = MODES.insert;
@@ -177,12 +182,9 @@ export class Vim {
         }
 
         if (
-            // (this.mode !== MODES.visual) &&
-            // (
-                (mode !== this.mode)
-                || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
-                || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
-            // )
+            (mode !== this.mode)
+            || (this.mode !== MODES.insert && !["ArrowUp", "ArrowDown", "k", "j"].includes(key))
+            || (this.mode === MODES.insert && !["ArrowUp", "ArrowDown"].includes(key))
         ) {
             this.i_col_max = this.doc.cursor.i_col;
         } else {

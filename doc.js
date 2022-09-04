@@ -174,7 +174,7 @@ export class Doc {
         return select_name;
     }
 
-    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select=true) {
+    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true) {
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
@@ -361,11 +361,11 @@ export class Doc {
         let select = this._get_cursor_select();
 
         if (select.top.abs === this.cursor.abs) {
-            let tmp_select = {...select.top};
+            let tmp_select = { ...select.top };
             this.move_cursor_right(select.bot.abs - this.cursor.abs, false, false);
             select.top = tmp_select;
         } else if (select.bot.abs === this.cursor.abs) {
-            let tmp_select = {...select.bot};
+            let tmp_select = { ...select.bot };
             this.move_cursor_left(this.cursor.abs - select.top.abs, false, false);
             select.bot = tmp_select;
         } else {
@@ -392,7 +392,7 @@ export class Doc {
         if (from == null) {
             from = this.buffer.gap_left - 1;
         }
-        for (let i = this.buffer.gap_left - 1; i >= 0; --i) {
+        for (let i = from; i >= 0; --i) {
             if (this.buffer.get_element(i) === "\n") {
                 break;
             }
@@ -409,6 +409,16 @@ export class Doc {
     move_cursor_to_beginning_of_line() {
         let n_steps = this.get_n_steps_to_beginning_of_line();
         this.move_cursor_left(n_steps);
+    }
+
+    move_cursor_to_beginning_of_select() {
+        if (this.is_select_started) {
+            var n_steps = this.cursor.abs - this.select.top.abs;
+        } else {
+            throw ("Can't move cursor to beginning of select since the select is not started. It's a bug on the caller side or in the doc engine")
+        }
+
+        this.move_cursor_left(n_steps, false, false);
     }
 
     move_select_to_end_of_line(which, at_cursor_line = true) {
@@ -431,7 +441,7 @@ export class Doc {
             this.select[which].i_row = this.cursor.i_row;
             this.select[which].abs = this.cursor.abs - n_steps;
         } else {
-            var n_steps = this.get_n_steps_to_beginning_of_line(this.select[which].abs);
+            var n_steps = this.get_n_steps_to_beginning_of_line(this.select[which].abs - 1);
             this.select[which].abs = this.select[which].abs - n_steps;
         }
         this.select[which].i_col = 0;
