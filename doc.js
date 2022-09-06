@@ -484,10 +484,11 @@ export class Doc {
             return;
         }
 
-        this.buffer.delete_left();
+        let char = this.buffer.delete_left()[0];
+        let line_length = this.current_line_length;
         this.cursor.abs -= 1;
-        if (this.is_at_eol) {
-            this.cursor.i_col = this.current_line_length;
+        if (is_newline(char)) {
+            this.cursor.i_col = this.current_line_length - line_length;
             this.cursor.i_row -= 1;
         } else {
             this.cursor.i_col -= 1;

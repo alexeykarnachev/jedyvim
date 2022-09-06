@@ -95,7 +95,9 @@ export class GapBuffer {
     }
 
     delete_left(n_steps=1) {
+        let deleted = this.buffer.slice(Math.max(0, this.gap_left - n_steps), this.gap_left);
         this.gap_left = Math.max(0, this.gap_left - n_steps);
+        return deleted;
     }
 
     delete_right(n_steps=1) {
