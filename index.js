@@ -110,13 +110,13 @@ function draw_cursor() {
 }
 
 function draw_cells() {
-    let i_char = 0;
     for (let i_row = 0; i_row < DOC_VIEW.lines.length; ++i_row) {
         for (let i_col = 0; i_col < DOC_VIEW.lines[i_row].length; ++i_col) {
-            let is_in_select = DOC_VIEW.is_in_select(i_char) && DOC.is_select_started;
-            let is_in_cursor = DOC_VIEW.is_in_cursor(i_char);
-            let cell_pos = DOC_GRID.get_cell_pos(i_row, i_col);
             let char = DOC_VIEW.lines[i_row][i_col];
+
+            let is_in_select = DOC.is_select_started && DOC_VIEW.is_in_select(i_row, i_col);
+            let is_in_cursor = DOC_VIEW.is_in_cursor(i_row, i_col);
+            let cell_pos = DOC_GRID.get_cell_pos(i_row, i_col);
 
             if (is_in_select) {
                 CONTEXT.fillStyle = SELECT_COLOR;
@@ -136,15 +136,13 @@ function draw_cells() {
                 CONTEXT.beginPath();
                 CONTEXT.arc(cell_pos.x + cell_pos.w * 0.5, cell_pos.y + cell_pos.h * 0.5, 2, 0, 2 * Math.PI);
                 CONTEXT.fill();
-            } else {
+            } else if (char != null) {
                 let char_width = CONTEXT.measureText(char).width;
                 let char_width_offset = (DOC_GRID.cell_width - char_width) / 2;
                 CONTEXT.font = FONT_STYLE;
                 CONTEXT.textBaseline = "bottom";
                 CONTEXT.fillText(char, cell_pos.x + char_width_offset, cell_pos.y + cell_pos.h);
             }
-
-            i_char += 1;
         }
     }
 }

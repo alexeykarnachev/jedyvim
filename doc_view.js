@@ -27,6 +27,9 @@ export class DocView {
         } else if (grid_cursor_pos.i_row < this.top_view_row) {
             this.top_view_row = grid_cursor_pos.i_row;
         }
+        grid_cursor_pos.i_row -= this.top_view_row;
+        grid_select_pos.top.i_row -= this.top_view_row;
+        grid_select_pos.bot.i_row -= this.top_view_row;
 
         let row_bot = this.top_view_row + this.doc_grid.n_rows - 1;
 
@@ -43,15 +46,18 @@ export class DocView {
         this.row_number_lines = get_row_number_lines(line_numbers, this.doc_grid.n_rows);
     }
 
-    is_in_select(i_char) {
-        if (i_char >= this.grid_select_pos.top.i_char && i_char <= this.grid_select_pos.bot.i_char) {
+    is_in_select(i_row, i_col) {
+        let pos = i_row * this.doc_grid.n_cols + i_col + 1;
+        let top_pos = this.grid_select_pos.top.i_row * this.doc_grid.n_cols + this.grid_select_pos.top.i_col;
+        let bot_pos = this.grid_select_pos.bot.i_row * this.doc_grid.n_cols + this.grid_select_pos.bot.i_col;
+        if (pos >= top_pos && pos <= bot_pos) {
             return true;
         }
         return false;
     }
 
-    is_in_cursor(i_char) {
-        if (i_char === this.grid_cursor_pos.i_char) {
+    is_in_cursor(i_row, i_col) {
+        if (i_row === this.grid_cursor_pos.i_row && i_col === this.grid_cursor_pos.i_col) {
             return true;
         }
         return false;
@@ -109,8 +115,8 @@ function get_row_number_lines(line_numbers, grid_n_rows) {
 }
 
 export function put_on_grid_with_word_wrapping(doc, n_cols) {
-    let grid_cursor_pos = { i_row: 0, i_col: 0, i_char: 0 };
-    let grid_select_pos = { top: { i_row: 0, i_col: 0, i_char: 0 }, bot: { i_row: 0, i_col: 0, i_char: 0 } };
+    let grid_cursor_pos = { i_row: 0, i_col: 0};
+    let grid_select_pos = { top: { i_row: 0, i_col: 0}, bot: { i_row: 0, i_col: 0} };
     let lines = [];
     let line_numbers = [];
 
@@ -141,19 +147,16 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
         if (i_char === doc.cursor.abs - 1) {
             grid_cursor_pos.i_row = i_row;
             grid_cursor_pos.i_col = i_col;
-            grid_cursor_pos.i_char = i_char + 1;
         }
 
         if (doc.select != null && i_char === doc.select.top.abs) {
             grid_select_pos.top.i_row = i_row;
-            grid_select_pos.top.i_col = i_col;
-            grid_select_pos.top.i_char = i_char;
+            grid_select_pos.top.i_col = i_col - 1;
         }
 
         if (doc.select != null && i_char === doc.select.bot.abs) {
             grid_select_pos.bot.i_row = i_row;
             grid_select_pos.bot.i_col = i_col;
-            grid_select_pos.bot.i_char = i_char;
         }
 
         if (char == null) {
@@ -162,6 +165,7 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
         i_char += 1;
     }
 
+    line.push(null);
     lines.push(line);
     line_numbers.push(line_number);
     return { lines: lines, line_numbers: line_numbers, grid_cursor_pos: grid_cursor_pos, grid_select_pos: grid_select_pos };
