@@ -138,14 +138,6 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
             line.push(char)
         }
 
-        if (i_col === n_cols || char === "\n") {
-            line_numbers.push(line_number);
-            lines.push(line);
-
-            line_number += char === "\n";
-            line = [];
-        }
-
         if (i_char === doc.cursor.abs) {
             grid_cursor_pos.i_row = i_row;
             grid_cursor_pos.i_col = i_col;
@@ -165,7 +157,12 @@ export function put_on_grid_with_word_wrapping(doc, n_cols) {
             break;
         }
 
-        if (i_col === n_cols || char === "\n") {
+        if (i_col === n_cols - 1 || char === "\n") {
+            line_numbers.push(line_number);
+            lines.push(line);
+
+            line_number += char === "\n";
+            line = [];
             i_row += 1;
             i_col = 0;
         } else {
