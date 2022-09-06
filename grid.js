@@ -14,7 +14,7 @@ export class Grid {
     }
 
     get n_cols() {
-        return Math.floor(this.width / this.cell_width);
+        return Math.floor(this.width / this.cell_width) - 1;
     }
 
     resize(width, height, width_offset, height_offset) {
