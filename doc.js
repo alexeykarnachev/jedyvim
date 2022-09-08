@@ -411,13 +411,20 @@ export class Doc {
         this.move_cursor_left(n_steps);
     }
 
+    move_select_left(which) {
+        if (this.select[which].i_col == 0) {
+            return;
+        }
+        this.select[which].i_col -= 1;
+        this.select[which].abs -= 1;
+    }
+
     move_select_to_end_of_line(which, at_cursor_line = true) {
         if (at_cursor_line) {
             var n_steps = this.get_n_steps_to_end_of_line();
             this.select[which].i_row = this.cursor.i_row;
             this.select[which].i_col = this.cursor.i_col + n_steps;
             this.select[which].abs = this.cursor.abs + n_steps;
-
         } else {
             var n_steps = this.get_n_steps_to_end_of_line(this.select[which].abs);
             this.select[which].i_col = this.select[which].i_col + n_steps;
@@ -510,6 +517,16 @@ export class Doc {
             this.delete_char_left();
         }
         this.move_cursor_to_first_nonblank_char_in_line();
+    }
+
+    delete_to_end_of_line() {
+        this.start_select();
+        this.move_select_to_end_of_line("bot", true);
+        let char = this.buffer.get_element(this.select.bot.abs);
+        if (is_newline(char)) {
+            this.move_select_left("bot");
+        }
+        this.delete_select();
     }
 
     insert_text(text) {

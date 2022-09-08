@@ -171,5 +171,12 @@
         "output": ["Hello, !\n", "             --a --a?\n", "             --a --a?    \n", "             --a --a?"],
         "cursor_pos": {"i_row": 1, "i_col": 13},
         "line_numbers": [0, 1, 2, 3]
+    },
+    {
+        "name": "delete_to_end_of_line_0",
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Escape"], "D", "i", ["Enter"], "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", ["Escape"], "D", "a", "-", ["Escape"], "b", "k", "D", "a", "-", ["Escape"], "w", "w", "i", ["Enter"], "H", "e", "l", "l", "o", ["Escape"], "e", "e", "a", "-", ["Enter"], ["Escape"], "a", "-", ["Enter"], ["Enter"], "-", "-", ["Enter"], ["Enter"], "-", "-", ["Enter"], ["Enter"], "-", "-", ["Enter"], ["Enter"], " ", " ", " ", " ", " ", " ", " ", " ", "-", "-", ["Enter"], ["Enter"], ["Escape"], "d", "d", "d", "d", "i", "-", ["Escape"], "k", "d", "d", "i", "-", ["Escape"], "k", "d", "d", "a", "h", "e", "l", "l", "o", ["Escape"], "b", "b", "b", "b", "b", "d", "d", "b", "b", "d", "d", "b", "b", "b", "D", "D", "D", "D", "D", "D", "a", "-", "-", "-", ["Escape"], "j", "d", "d", "D", ["Escape"]],
+        "output": ["Hello, -\n", "Hello\n", "He---\n", "\n", "--\n", "\n", "        -hello---"],
+        "cursor_pos": {"i_row": 3, "i_col": 0},
+        "line_numbers": [0, 1, 2, 3, 4, 5, 6]
     }
 ]

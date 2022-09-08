@@ -159,6 +159,8 @@ export class Vim {
                     this.command = [];
                 } else if (key === "d") {
                     this.command.push(key);
+                } else if (key === "D") {
+                    this.doc.delete_to_end_of_line();
                 } else if (key === "v") {
                     this.doc.start_select();
                     this.mode = MODES.visual;
