@@ -484,8 +484,8 @@ export class Doc {
             return;
         }
 
-        let char = this.buffer.delete_left()[0];
         let line_length = this.current_line_length;
+        let char = this.buffer.delete_left()[0];
         this.cursor.abs -= 1;
         if (is_newline(char)) {
             this.cursor.i_col = this.current_line_length - line_length;
@@ -500,6 +500,16 @@ export class Doc {
         this.stop_select();
         this.select_word();
         this.delete_select();
+    }
+
+    delete_line() {
+        this.stop_select();
+        this.start_select_line();
+        this.delete_select();
+        if (this.is_at_eod) {
+            this.delete_char_left();
+        }
+        this.move_cursor_to_first_nonblank_char_in_line();
     }
 
     insert_text(text) {

@@ -58,6 +58,10 @@ export class Vim {
 
             if (command === "d" && key === "i") {
                 this.command.push(key);
+            } else if (command === "d" && key === "d") {
+                this.doc.span_select_on_line
+                this.doc.delete_line();
+                this.command = [];
             } else {
                 this.command = [];
             }

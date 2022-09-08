@@ -164,5 +164,12 @@
         "output": ["ho, !"],
         "cursor_pos": {"i_row": 0, "i_col": 1},
         "line_numbers": [0]
+    },
+    {
+        "name": "delete_line_0",
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], ["Enter"], " ", " ", " ", "H", "o", "w", " ", "a", "r", "e", " ", "y", "o", "u", " ", "i", "n", " ", "g", "e", "n", "e", "r", "a", "l", "?", " ", " ", " ", " ", " ", " ", "D", "O", "I", "N", "G", "?", ["Enter"], ["Enter"], ["Enter"], "W", "H", "A", "T", " ", "i", "s", " ", "y", "o", "u", "r", " ", "n", "a", "m", "e", "?", ["Enter"], ["Enter"], ["Enter"], " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", ["Enter"], ["Enter"], ["Enter"], " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "a", "?", ["Escape"], "k", "d", "d", "i", "-", ["Escape"], "k", "d", "d", "i", "-", ["Escape"], "k", "d", ["Escape"], "a", "-", "a", "?", ["Escape"], "k", "d", "d", "k", "d", "d", "i", "-", ["ArrowLeft"], ["Backspace"], ["Escape"], "i", "a", ["Escape"], "j", "i", "a", ["Escape"], "k", "k", "k", "d", "d", "d", "d", "k", "d", "d", "I", "-", ["ArrowDown"], ["ArrowLeft"], "-", ["Escape"], "o", "H", "o", "w", " ", "a", "r", "e", " ", "y", "o", "u", "d", ["Backspace"], "?", ["Escape"], "k", "o", ["Escape"], "d", "d", "d", "d", "i", "-", ["ArrowUp"], "-", ["Escape"], "k", "w", "w", "d", "d", "k", "i", ["Tab"], ["Tab"], ["Tab"], " ", "-", "-", "a", " ", "-", "-", "a", "?", ["Escape"], "k", "h", "d", "i", "w", "o", "H", "e", "l", "l", "o", ",", ["Escape"], "d", "d"],
+        "output": ["Hello, !\n", "             --a --a?\n", "             --a --a?    \n", "             --a --a?"],
+        "cursor_pos": {"i_row": 1, "i_col": 13},
+        "line_numbers": [0, 1, 2, 3]
     }
 ]
