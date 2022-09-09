@@ -263,7 +263,7 @@ export class Doc {
 
     move_cursor_down(i_col_max) {
         this.move_cursor_to_end_of_line();
-        this.move_cursor_right(1, false);
+        this.move_cursor_right(1, false)
         this.move_cursor_to_beginning_of_line();
         this.move_cursor_right(i_col_max);
     }
@@ -409,6 +409,33 @@ export class Doc {
     move_cursor_to_beginning_of_line() {
         let n_steps = this.get_n_steps_to_beginning_of_line();
         this.move_cursor_left(n_steps);
+    }
+
+    move_cursor_to_paragraph(is_up = false) {
+        let any_char_seen = this.current_line_length > 0;
+        while (true) {
+            let i_row = this.cursor.i_row;
+            if (is_up) {
+                this.move_cursor_up(0);
+                if (i_row == this.cursor.i_row) {
+                    this.move_cursor_to_beginning_of_line();
+                    return;
+                }
+            } else {
+                this.move_cursor_down(0);
+                if (i_row == this.cursor.i_row) {
+                    this.move_cursor_to_end_of_line();
+                    return;
+                }
+            }
+
+            let line_length = this.current_line_length;
+            if (line_length == 0 && any_char_seen) {
+                return;
+            }
+
+            any_char_seen |= line_length > 0;
+        }
     }
 
     move_select_left(which) {

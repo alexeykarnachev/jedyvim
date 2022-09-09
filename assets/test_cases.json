@@ -178,5 +178,12 @@
         "output": ["Hello, -\n", "Hello\n", "He---\n", "\n", "--\n", "\n", "        -hello---"],
         "cursor_pos": {"i_row": 3, "i_col": 0},
         "line_numbers": [0, 1, 2, 3, 4, 5, 6]
+    },
+    {
+        "name": "paragraph_navigation_0",
+        "input": ["i", "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", ["Enter"], ["Enter"], "a", ["Enter"], ["Enter"], " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "b", ["Enter"], ["Enter"], ["Enter"], ["Enter"], ["Enter"], "H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!", "!", ["Enter"], ["Enter"], ["Enter"], ["Enter"], " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", ["Enter"], ["Enter"], ["Enter"], "a", ["Enter"], "b", ["Escape"], "{", "i", "-", ["Escape"], "{", "i", "-", ["Escape"], "{", "i", "-", ["Escape"], "{", "i", "-", ["Escape"], "{", "i", "-", ["Escape"], "{", "{", "i", "-", ["Escape"], "{", "{", "i", "-", ["Escape"], "}", "}", "i", "-", ["Escape"], "}", "}", "a", "-", ["Escape"], "{", "i", ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "}", "{", "i", "-", ["ArrowLeft"], ["Backspace"], ["ArrowDown"], ["ArrowLeft"], ["Backspace"], ["Escape"], "}", "{", "}", "{", "}", "i", ["ArrowLeft"], ["Backspace"], ["ArrowLeft"], ["Backspace"], ["ArrowLeft"], ["Backspace"], ["ArrowLeft"], ["Backspace"], ["ArrowUp"], ["ArrowLeft"], ["Backspace"], ["ArrowLeft"], ["Backspace"], ["ArrowLeft"], ["Backspace"], ["Escape"], "I", ["Backspace"], ["ArrowLeft"], ["Backspace"], ["ArrowUp"], ["ArrowLeft"], ["Backspace"], ["Escape"], ["Escape"]],
+        "output": ["-Hello, world!-a-\n", "            b-Hello, world!!---\n", "                 --ab-"],
+        "cursor_pos": {"i_row": 0, "i_col": 15},
+        "line_numbers": [0, 1, 2]
     }
 ]

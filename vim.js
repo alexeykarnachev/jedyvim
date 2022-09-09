@@ -126,6 +126,10 @@ export class Vim {
                 this.doc.move_cursor_up(this.i_col_max);
             } else if (key === "j") {
                 this.doc.move_cursor_down(this.i_col_max);
+            } else if (key === "}") {
+                this.doc.move_cursor_to_paragraph(false);
+            } else if (key === "{") {
+                this.doc.move_cursor_to_paragraph(true);
             }
 
             if (this.mode === MODES.visual) {
