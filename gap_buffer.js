@@ -101,7 +101,9 @@ export class GapBuffer {
     }
 
     delete_right(n_steps=1) {
+        let deleted = this.buffer.slice(this.gap_right + 1, Math.min(this.buffer.length, this.gap_right + n_steps + 1));
         this.gap_right = Math.min(this.buffer.length - 1, this.gap_right + n_steps);
+        return deleted;
     }
 
     grow() {

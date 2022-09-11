@@ -171,6 +171,8 @@ export class Vim {
                 } else if (key === "V") {
                     this.doc.start_select_line();
                     this.mode = MODES.visual_line;
+                } else if (key === "u") {
+                    this.doc.undo();
                 }
             }
         } else if (this.mode === MODES.insert) {

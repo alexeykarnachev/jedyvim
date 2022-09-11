@@ -1,8 +1,10 @@
 import { GapBuffer } from "./gap_buffer.js";
+import { UndoTree, OP } from "./undo_tree.js";
 
 export class Doc {
     constructor() {
         this.buffer = new GapBuffer(32);
+        this.undo_tree = new UndoTree();
         this.cursor = { i_row: 0, i_col: 0, abs: 0 };
         this.select = null;
         this.is_select_started = false;
@@ -175,6 +177,8 @@ export class Doc {
     }
 
     move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true) {
+        this.undo_tree.finalize();
+
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_bol && (stop_at_bol || this.is_at_bod)) {
@@ -214,7 +218,17 @@ export class Doc {
         }
     }
 
+    move_cursor(n_steps, stop_at_eol, affect_line_select) {
+        if (n_steps < 0) {
+            this.move_cursor_left(-n_steps, stop_at_eol, affect_line_select);
+        } else if (n_steps > 0) {
+            this.move_cursor_right(n_steps, stop_at_eol, affect_line_select);
+        }
+    }
+
     move_cursor_right(n_steps = 1, stop_at_eol = true, affect_line_select = true) {
+        this.undo_tree.finalize();
+
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
             if (this.is_at_eol && (stop_at_eol || this.is_at_eod)) {
@@ -499,27 +513,44 @@ export class Doc {
         this.move_cursor_right(right_n_steps + left_n_steps - 1, false);
     }
 
-    delete_select() {
+    delete_select(add_to_history = true) {
         if (!this.is_select_started) {
             return;
         }
         if (this.cursor.abs < this.select.top.abs || this.cursor > this.select.bot.abs) {
             throw ("[ERROR] Can't remove select since cursor position is not in the select boundary. It's a bug in the doc engine")
         }
+        let abs = this.select.top.abs;
+        let restore_abs = null;
+        if (this.is_select_line_started) {
+            restore_abs = this.cursor.abs;
+        }
+
         let left_n_steps = this.cursor.abs - this.select.top.abs;
         let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;
         this.move_cursor_left(left_n_steps, false);
-        this.buffer.delete_right(left_n_steps + right_n_steps);
+        let deleted = this.buffer.delete_right(left_n_steps + right_n_steps);
+
+        if (add_to_history) {
+            this.undo_tree.finalize();
+            this.undo_tree.delete_text_right(deleted, abs, restore_abs);
+        }
+
         this.stop_select();
     }
 
-    delete_char_left() {
+    delete_char_left(add_to_history = true) {
         if (this.is_at_bod) {
             return;
         }
 
         let line_length = this.current_line_length;
         let char = this.buffer.delete_left()[0];
+
+        if (add_to_history) {
+            this.undo_tree.delete_text_left(char, this.cursor.abs);
+        }
+
         this.cursor.abs -= 1;
         if (is_newline(char)) {
             this.cursor.i_col = this.current_line_length - line_length;
@@ -556,9 +587,13 @@ export class Doc {
         this.delete_select();
     }
 
-    insert_text(text) {
+    insert_text(text, add_to_history = true) {
         if (this.is_select_started) {
             this.delete_select();
+        }
+
+        if (add_to_history) {
+            this.undo_tree.insert_text(text, this.cursor.abs);
         }
 
         for (let i = 0; i < text.length; ++i) {
@@ -585,6 +620,40 @@ export class Doc {
     insert_new_line_below_cursor() {
         this.move_cursor_to_end_of_line();
         this.insert_text("\n");
+    }
+
+    undo() {
+        let ops = this.undo_tree.undo();
+        if (ops == null) {
+            return;
+        }
+
+        for (let i = ops.length - 1; i >= 0; --i) {
+            let op = ops[i];
+            if (op.op === OP.DELETE_LEFT) {
+                let n_steps = (op.abs - op.text.length) - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                this.insert_text([...op.text].reverse(), false);
+            } else if (op.op === OP.DELETE_RIGHT) {
+                let n_steps = op.abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                this.insert_text([...op.text], false);
+                this.move_cursor_left(op.text.length, false, false);
+            } else if (op.op === OP.INSERT) {
+                let n_steps = (op.abs + op.text.length) - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else {
+                throw (`[ERROR] Unknown op type '${op.op}'. It's a bug in the doc engine or in the undo tree`)
+            }
+
+            if (op.restore_abs != null) {
+                let n_steps = op.restore_abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+            }
+        }
     }
 }
 
