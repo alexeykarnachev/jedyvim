@@ -1,5 +1,5 @@
 import { GapBuffer } from "./gap_buffer.js";
-import { UndoTree, OP } from "./undo_tree.js";
+import { OP, UndoTree } from "./undo_tree.js";
 
 export class Doc {
     constructor() {
@@ -176,8 +176,10 @@ export class Doc {
         return select_name;
     }
 
-    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true) {
-        this.undo_tree.finalize();
+    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true, finalize_history=true) {
+        if (finalize_history) {
+            this.undo_tree.finalize();
+        }
 
         let i_row = this.cursor.i_row;
         for (let i = 0; i < n_steps; ++i) {
@@ -513,7 +515,7 @@ export class Doc {
         this.move_cursor_right(right_n_steps + left_n_steps - 1, false);
     }
 
-    delete_select(add_to_history = true) {
+    delete_select() {
         if (!this.is_select_started) {
             return;
         }
@@ -531,10 +533,8 @@ export class Doc {
         this.move_cursor_left(left_n_steps, false);
         let deleted = this.buffer.delete_right(left_n_steps + right_n_steps);
 
-        if (add_to_history) {
-            this.undo_tree.finalize();
-            this.undo_tree.delete_text_right(deleted, abs, restore_abs);
-        }
+        this.undo_tree.delete_text_right(deleted, abs, restore_abs);
+        this.undo_tree.finalize();
 
         this.stop_select();
     }
@@ -611,15 +611,31 @@ export class Doc {
         }
     }
 
-    insert_new_line_above_cursor() {
+    insert_text_at_end_of_line(text, add_to_history = true) {
+        let restore_abs = this.cursor.abs;
+        this.move_cursor_to_end_of_line();
+        if (add_to_history) {
+            this.undo_tree.insert_text(text, this.cursor.abs, restore_abs);
+        }
+        this.insert_text(text, false);
+    }
+
+    insert_text_at_beginning_of_line(text, add_to_history = true) {
+        let restore_abs = this.cursor.abs;
         this.move_cursor_to_beginning_of_line();
-        this.insert_text("\n");
-        this.move_cursor_left(1, false);
+        if (add_to_history) {
+            this.undo_tree.insert_text(text, this.cursor.abs, restore_abs);
+        }
+        this.insert_text(text, false);
+        this.move_cursor_left(1, false, false, false);
+    }
+
+    insert_new_line_above_cursor() {
+        this.insert_text_at_beginning_of_line("\n");
     }
 
     insert_new_line_below_cursor() {
-        this.move_cursor_to_end_of_line();
-        this.insert_text("\n");
+        this.insert_text_at_end_of_line("\n");
     }
 
     undo() {
