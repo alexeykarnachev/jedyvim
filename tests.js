@@ -66,7 +66,13 @@ function run_test(test_case) {
             inp = inp.split("");
         }
         for (let key of inp) {
-            vim.process_input(key, null);
+            let ctrl = false;
+            if (key === "<C-R>") {
+                key = "r";
+                ctrl = true;
+                console.log(key, ctrl);
+            }
+            vim.process_input(key, ctrl);
         }
     }
 
