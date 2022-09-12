@@ -670,6 +670,43 @@ export class Doc {
                 this.move_cursor(n_steps, false, false);
             }
         }
+
+        return true;
+    }
+
+    redo() {
+        let ops = this.undo_tree.redo();
+        if (ops == null) {
+            return false;
+        }
+
+        for (let i = ops.length - 1; i >= 0; --i) {
+            let op = ops[i];
+            if (op.op === OP.DELETE_LEFT) {
+                let n_steps = op.abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else if (op.op === OP.DELETE_RIGHT) {
+                let n_steps = (op.abs + op.text.length) - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else if (op.op === OP.INSERT) {
+                let n_steps = op.abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                this.insert_text(op.text, false);
+            } else {
+                throw (`[ERROR] Unknown op type '${op.op}'. It's a bug in the doc engine or in the undo tree`)
+            }
+
+            let n_steps = op.abs - this.cursor.abs;
+            this.move_cursor(n_steps, false, false);
+        }
+
+        return true;
     }
 }
 

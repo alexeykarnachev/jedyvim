@@ -61,9 +61,17 @@ export class UndoTree {
         this.ptr -= 1;
         if (this.ptr < 0) {
             this.ptr = null;
-            return;
+            return null;
         }
 
         return this.history[this.ptr];
+    }
+
+    redo() {
+        if (this.current.length > 0 || this.ptr === this.history.length) {
+            return null;
+        }
+
+        return this.history[this.ptr++];
     }
 }

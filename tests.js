@@ -66,7 +66,7 @@ function run_test(test_case) {
             inp = inp.split("");
         }
         for (let key of inp) {
-            vim.process_input(key);
+            vim.process_input(key, null);
         }
     }
 

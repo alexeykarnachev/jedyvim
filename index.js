@@ -57,6 +57,7 @@ const ROW_NUMBER_GRID = new Grid(
 )
 
 const DOC_VIEW = new DocView(VIM, DOC, DOC_GRID, INFO_GRID);
+let KEYDOWN_RES = null;
 
 function onresize() {
     CANVAS.width = window.innerWidth;
@@ -68,7 +69,7 @@ function onresize() {
 
 onresize();
 window.onresize = onresize;
-window.onkeydown = event => { VIM.onkeydown(event) };
+window.onkeydown = event => { KEYDOWN_RES = VIM.onkeydown(event) };
 
 function draw_row_number_lines() {
     for (let i_row = 0; i_row < DOC_VIEW.row_number_lines.length; ++i_row) {

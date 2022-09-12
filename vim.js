@@ -6,7 +6,7 @@ export const MODES = {
     insert: "insert",
     visual: "visual",
     visual_line: "visual_line",
-}
+};
 
 export class Vim {
     /**
@@ -17,6 +17,7 @@ export class Vim {
         this.mode = MODES.normal;
         this.i_col_max = 0;
         this.command = [];
+        this.last_info_msg = null;
     }
 
     get is_insert_mode() {
@@ -30,11 +31,17 @@ export class Vim {
         event.preventDefault();
 
         let key = event.key;
-        this.process_input(key)
+        let ctrl = event.ctrlKey;
+        if (!["Control", "Alt"].includes(key)) {
+            return this.process_input(key, ctrl);
+        }
+
+        return false;
     }
 
-    process_input(key) {
+    process_input(key, ctrl) {
         let mode = this.mode;
+        let last_info_msg = null;
 
         if (key === "ArrowLeft") {
             this.doc.move_cursor_left();
@@ -172,7 +179,13 @@ export class Vim {
                     this.doc.start_select_line();
                     this.mode = MODES.visual_line;
                 } else if (key === "u") {
-                    this.doc.undo();
+                    if (!this.doc.undo()) {
+                        last_info_msg = "Already at oldest change";
+                    }
+                } else if (key === "r" && ctrl) {
+                    if (!this.doc.redo()) {
+                        last_info_msg = "Already at newest change";
+                    }
                 }
             }
         } else if (this.mode === MODES.insert) {
@@ -203,6 +216,8 @@ export class Vim {
         } else {
             this.i_col_max = Math.max(this.i_col_max, this.doc.cursor.i_col);
         }
+
+        this.last_info_msg = last_info_msg;
     }
 }
 
