@@ -230,6 +230,20 @@
         "line_numbers": [0, 1]
     },
     {
+        "name": "undo_4",
+        "input": ["i", "1", "2", "3", ["Escape"], "V", "d", "u", "a", ["Enter"], ["Escape"], "V", "d", "u", "a", ["Enter"], ["Escape"]],
+        "output": ["1\n", "2\n", "3"],
+        "cursor_pos": {"i_row": 2, "i_col": 0},
+        "line_numbers": [0, 1, 2]
+    },
+    {
+        "name": "undo_5",
+        "input": ["i", "1", "2", "3", ["Escape"], "o", "1", "2", "3", ["Escape"], "V", "d", "u", "u"],
+        "output": ["123"],
+        "cursor_pos": {"i_row": 0, "i_col": 2},
+        "line_numbers": [0]
+    },
+    {
         "name": "basic_2",
         "input": ["i", "1", "2", "3", ["Escape"], "o", "-", "-", "-", ["Escape"], "O", ["Escape"], "$", "_", "u", "a", " ", "H", "O", "W", " ", "A", "R", "E", " ", "Y", "O", "U", "D", "^", "^", "^", "^", "^", " ", " ", "-", "-", "-", ">", ">", ">", ".", ".", ".", ["Escape"], "v", "b", "b", "B", "x", "a", "-", "-", "-", ["Escape"], "o", "1", "2", "3", "-", "-", "-", ["Escape"], "i", ["Escape"], "i", ["Escape"], "i", "a", "b", "c", ["Escape"], "v", "k", "x", "i", "-", "1", "2", "3", ["Escape"], "V", "k", "h", "h", "x", "u", "a", "-", "-", ["Escape"], "u", "u", "u", "u", "u", "u", "u", "u", "o", "H", "O", "W", " ", "A", "R", "E", " ", "Y", "O", "U", "D", "?", ["ArrowLeft"], ["Backspace"], ["Escape"], "A", " ", "-", "-", "-", "^", "^", "^", "^", "^", ["Escape"], "e", "e", "b", "b", "W", "W", "i", "-", "-", ["Escape"], "o", "1", "2", "3", " ", ".", ".", ".", ".", " ", "^", "^", "^", "^", "\"", "\"", "\"", "\"", "\"", ["Escape"], "v", "b", "b", "b", "b", "b", "b", "V", "h", "h", "h", "x", "u", "V", "l", "l", "l", "l", "d", "u", "w", "w", "w", "i", ["ArrowLeft"], ["ArrowLeft"], ["ArrowRight"], "-", "-", "-", ["Escape"], "w", "w", "w", "w", "w", "w", "i", "-", "-", "-", "-", ["Escape"], "V", "k", "k", "k", "h", "h", "x", "u", "a", ["Enter"], ["Escape"], "V", "j", "j", "x", "$", "a", "_", "_", "_", "_", ["Escape"], "_", "i", "-", "-", "-", ["Escape"], "l", "D", "a", ["ArrowUp"], " ", ["Escape"], "j", "I", ["Backspace"], ["Escape"], "O", "h", "o", "w", " ", "a", "r", "e", " ", "y", "o", "u", "d", ["Backspace"], "?", "?", ["Escape"]],
         "output": ["how are you??\n", "12 ---"],
@@ -242,5 +256,19 @@
         "output": ["what"],
         "cursor_pos": {"i_row": 0, "i_col": 3},
         "line_numbers": [0]
+    },
+    {
+        "name": "basic_3",
+        "input": ["i", "1", "2", "3", " ", " ", ["Tab"], "_", "_", "&", "&", "&", "^", "^", "^", "a", "a", "1", "^", "^", "^", "^", "_", "_", ".", ".", ".", " ", " ", "3", "4", "5", ["Escape"], "b", "b", "b", "b", "i", ["Enter"], ["Escape"], "B", "i", ["Enter"], ["Escape"], "k", "w", "k", "e", "a", ["Escape"], "V", ["Escape"], "D", "a", "-", ["Enter"], "h", "o", "w", " ", "a", "r", "e", " ", "y", "o", "u", "d", "?", ["ArrowLeft"], ["Backspace"], ["Escape"], "_", "i", ["Enter"], " ", " ", " ", " ", " ", " ", ["Escape"], "_", "i", "-", "-", "-", ["Enter"], ["Escape"], "k", "f", "-", "i", ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Escape"], "k", "V", "k", "l", "l", "x", "u", ["<C-R>"], "u", "u", "i", ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Backspace"], ["Enter"], ["ArrowUp"], "1", "2", "3", ["Escape"], "v", "j", "j", "l", "l", "x", "i", "3", "4", ["Enter"], ["Escape"], "u", "u", "u", "u", ["<C-R>"], ["<C-R>"], "a", ["Enter"], ["Escape"], "w", "w", "w", "w", "w", "w", "w", "w", "i", "-", "-", ["Enter"], ["Escape"], "B", "B", "B", "i", "-", "-", ["Enter"], ["Escape"], "V", "j", "j", "x", "a", ["Enter"], ["ArrowRight"], ["Enter"], ["Escape"], "a", ["ArrowRight"], ["ArrowRight"], ["ArrowRight"], ["Enter"], ["Escape"], "u", "u", ["<C-R>"], ["<C-R>"], "a", ["ArrowUp"], ["ArrowDown"], "-", "-", "-", "-", ["Escape"], "k", "V", "k", "k", "k", "w", "w", "w", "x", "i", "-", "-", "-", ["Escape"], "u", "u", ["<C-R>"], ["<C-R>"], "a", ["Enter"], ["Escape"], "B", "B", "B", "B", "B", "B", "B", "i", "3", "4", "5", "6", "-", "-", "-", "-", ["Escape"], "j", "V", "}", "x", "a", "-", "-", "-", ["Enter"], ["Escape"], "u", "u", "j", "j", "j", "j", "j", "j", "o", "h", "e", "l", "l", "o", "!", ["Escape"], "u", "u", "u", "a", ["Enter"], ["Escape"], "k", "d", "d", "k", "V", "d", "k", "k", "o", "1", "2", "3", ["Escape"], "d", "d", "u", ["<C-R>"], ["<C-R>"], ["<C-R>"], ["<C-R>"], ["<C-R>"], ["<C-R>"], "k", "V", "k", "k", "x", ["Escape"], "$", "a", ["Enter"], "D", "O", "N", "E", "!", ["Escape"]],
+        "output": ["12-\n", "---\n", "DONE!\n", "-^^__----\n", "...  345"],
+        "cursor_pos": {"i_row": 2, "i_col": 4},
+        "line_numbers": [0, 1, 2, 3, 4]
+    }, 
+    {
+        "name": "basic_4",
+        "input": ["i", "1", "2", "3", " ", ["Escape"], "a", "4", "5", "6", ["Escape"], "a", ["ArrowLeft"], "-", "-", "-", ["Escape"], "v", "b", "x", "a", " ", "7", "8", "9", ["Escape"], "u", "u", ["<C-R>"], "i", ["Enter"], "-", "-", ["Escape"], "V", "b", "b", "h", "h", "x", "u", "i", "-", "-", ["ArrowDown"], ["Enter"], "a", "b", "c", ["Escape"], "V", "x", "u", ["<C-R>"], "u", "a", "-", "-", ["ArrowUp"], ["ArrowUp"], ["Escape"], "v", "j", "h", "i", "x", "x", "i", "-", "-", ["Escape"], "v", "w", "w", "w", "x", "i", ["Enter"], "-", "-", "-", ["Escape"], "u", ["<C-R>"], ["<C-R>"], ["<C-R>"], "u", "u", "u", "u", "u", "u", "u", "u", "u", "u", "u", "i", ["Escape"], "$", "a", ["Backspace"], ["Enter"], "-", "-", "-", "^", "^", "^", "&", "&", "&", "_", "_", "_", "_", ["Escape"], "_", "$", "u", ["<C-R>"], "w", "w", "B", "B", "W", "W", "a", ["Enter"], "a", "s", "d", "f", "s", "a", ["Escape"], "V", "d", "d", "d", "a", ["Enter"], "-", "-", "-", ["Escape"], "i", "a", "b", "c", ["Escape"], "u", ["<C-R>"], "u", "u", "u", "u", "u", "u", "a", ["Backspace"], ["Enter"], "4", "5", "6", ["Enter"], "7", "8", "9", ["Enter"], ["Enter"], "a", "b", "c", "d", ["Enter"], ["Enter"], "c", "d", "e", "f", ["Escape"], "V", "{", "{", "x", "u", ["<C-R>"], "u", ["<C-R>"], "u", "i", "-", "-", "-", "-", ["ArrowUp"], "-", ["ArrowUp"], "-", ["Escape"], "i", ["Enter"], ["Escape"], "u", ["<C-R>"], "u", "u", "u", "u", "V", "j", "j", "x", "V", "d", ["Escape"]],
+        "output": ["123\n", "456\n", "789"],
+        "cursor_pos": {"i_row": 2, "i_col": 0},
+        "line_numbers": [0, 1, 2]
     }
 ]

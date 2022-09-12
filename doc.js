@@ -525,7 +525,11 @@ export class Doc {
         let abs = this.select.top.abs;
         let restore_abs = null;
         if (this.is_select_line_started) {
-            restore_abs = this.cursor.abs;
+            if (this.select.top.i_row === this.cursor.i_row && this.select.top.i_row !== this.select.bot.i_row) {
+                restore_abs = this.cursor.abs;
+            } else {
+                restore_abs = this.select.top.abs;
+            }
         }
 
         let left_n_steps = this.cursor.abs - this.select.top.abs;
@@ -534,9 +538,9 @@ export class Doc {
         let deleted = this.buffer.delete_right(left_n_steps + right_n_steps);
 
         if (!this.is_at_bod && this.is_at_eod && this.is_select_line_started) {
-            let char = this.delete_char_left();
+            let char = this.delete_char_left(false);
             if (!is_newline(char)) {
-                throw(`[ERROR] When the cursor appears at the end of the document after select deletion, it's expected that the last char is a new line (from the previous line), but we have '${char}'. It's a bug in the doc engine`);
+                throw (`[ERROR] When the cursor appears at the end of the document after select deletion, it's expected that the last char is a new line (from the previous line), but we have '${char}'. It's a bug in the doc engine`);
             }
             this.move_cursor_to_beginning_of_line();
             deleted.unshift(char);
@@ -693,7 +697,7 @@ export class Doc {
         if (ops == null) {
             return false;
         } else if (ops.length === 0) {
-            throw("[ERROR] Redo received empty sequence of commands. It's a bug in the doc engine or in the undo tree");
+            throw ("[ERROR] Redo received empty sequence of commands. It's a bug in the doc engine or in the undo tree");
         }
 
         for (let i = 0; i < ops.length; ++i) {
