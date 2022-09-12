@@ -50,7 +50,7 @@ end
 
 KC_1BYTE = []
 (0..255).each {|n| KC_1BYTE.push("<%#04x>" % n)} # Fallback for non-ASCII
-(1..127).each {|n| KC_1BYTE[n] = "<C-#{(n ^ 0x40).chr}>"}
+(1..127).each {|n| KC_1BYTE[n] = ["<C-#{(n ^ 0x40).chr}>"]}
 (32..126).each {|c| KC_1BYTE[c] = c.chr } # Printing chars
 KC_1BYTE[0x1b] = ["Escape"] # Special names for a few control chars
 KC_1BYTE[0x0d] = ["Enter"]

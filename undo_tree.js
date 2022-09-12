@@ -1,4 +1,4 @@
-export const OP = { INSERT: "insert", DELETE_LEFT: "delete_left", DELETE_RIGHT: "delete_right" }
+export const OP = { INSERT_LEFT: "insert_left", INSERT_RIGHT: "insert_right", DELETE_LEFT: "delete_left", DELETE_RIGHT: "delete_right" }
 
 export class UndoTree {
     constructor() {
@@ -10,7 +10,7 @@ export class UndoTree {
     _add_operation(text, abs, restore_abs, op) {
         text = [...text];
 
-        if (![OP.INSERT, OP.DELETE_LEFT, OP.DELETE_RIGHT].includes(op)) {
+        if (![OP.INSERT_LEFT, OP.INSERT_RIGHT, OP.DELETE_LEFT, OP.DELETE_RIGHT].includes(op)) {
             throw (`[ERROR] Can't '${op}' text, this op is not supported by the undo tree. It's a bug in the undo tree or on the caller side`);
         }
 
@@ -23,8 +23,12 @@ export class UndoTree {
         }
     }
 
-    insert_text(text, abs, restore_abs=null) {
-        this._add_operation(text, abs, restore_abs, OP.INSERT);
+    insert_text_left(text, abs, restore_abs=null) {
+        this._add_operation(text, abs, restore_abs, OP.INSERT_LEFT);
+    }
+
+    insert_text_right(text, abs, restore_abs=null) {
+        this._add_operation(text, abs, restore_abs, OP.INSERT_RIGHT);
     }
 
     delete_text_left(text, abs, restore_abs=null) {
@@ -61,9 +65,17 @@ export class UndoTree {
         this.ptr -= 1;
         if (this.ptr < 0) {
             this.ptr = null;
-            return;
+            return null;
         }
 
         return this.history[this.ptr];
+    }
+
+    redo() {
+        if (this.current.length > 0 || this.ptr === this.history.length) {
+            return null;
+        }
+
+        return this.history[this.ptr++];
     }
 }

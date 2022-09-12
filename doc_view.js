@@ -40,7 +40,7 @@ export class DocView {
         this.grid_select_pos = grid_select_pos;
         this.line_numbers = line_numbers;
         this.lines = lines;
-        this.info_line = get_info_line(this.doc.cursor.i_row, this.doc.cursor.i_col, this.info_grid.n_cols, this.vim.mode, this.vim.command);
+        this.info_line = get_info_line(this.doc.cursor.i_row, this.doc.cursor.i_col, this.info_grid.n_cols, this.vim.mode, this.vim.command, this.vim.last_info_msg);
         this.row_number_lines = get_row_number_lines(line_numbers, this.doc_grid.n_rows);
     }
 
@@ -62,10 +62,13 @@ export class DocView {
     }
 }
 
-function get_info_line(i_row, i_col, n_total_cols, mode, command) {
+function get_info_line(i_row, i_col, n_total_cols, mode, command, info_msg) {
     i_row += 1;
     i_col += 1;
-    if (mode === MODES.insert) {
+    if (info_msg != null) {
+        var mode_str = info_msg;
+        var command_str = "";
+    } else if (mode === MODES.insert) {
         var mode_str = "-- INSERT --";
         var command_str = "";
     } else if (mode === MODES.normal) {
@@ -88,13 +91,6 @@ function get_info_line(i_row, i_col, n_total_cols, mode, command) {
         " ".repeat(command_str.length),
         `${i_row},${i_col}`
     ].join("");
-    // let info = [
-    //     mode_str,
-    //     " ".repeat(n_total_cols - mode_str.length - 23),
-    //     command_str,
-    //     " ".repeat(10 - command_str.length),
-    //     `${i_row},${i_col}`
-    // ].join("");
 
     return info;
 }

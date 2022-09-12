@@ -176,7 +176,7 @@ export class Doc {
         return select_name;
     }
 
-    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true, finalize_history=true) {
+    move_cursor_left(n_steps = 1, stop_at_bol = true, affect_line_select = true, finalize_history = true) {
         if (finalize_history) {
             this.undo_tree.finalize();
         }
@@ -525,13 +525,26 @@ export class Doc {
         let abs = this.select.top.abs;
         let restore_abs = null;
         if (this.is_select_line_started) {
-            restore_abs = this.cursor.abs;
+            if (this.select.top.i_row === this.cursor.i_row && this.select.top.i_row !== this.select.bot.i_row) {
+                restore_abs = this.cursor.abs;
+            } else {
+                restore_abs = this.select.top.abs;
+            }
         }
 
         let left_n_steps = this.cursor.abs - this.select.top.abs;
         let right_n_steps = this.select.bot.abs - this.cursor.abs + 1;
         this.move_cursor_left(left_n_steps, false);
         let deleted = this.buffer.delete_right(left_n_steps + right_n_steps);
+
+        if (!this.is_at_bod && this.is_at_eod && this.is_select_line_started) {
+            let char = this.delete_char_left(false);
+            if (!is_newline(char)) {
+                throw (`[ERROR] When the cursor appears at the end of the document after select deletion, it's expected that the last char is a new line (from the previous line), but we have '${char}'. It's a bug in the doc engine`);
+            }
+            this.move_cursor_to_beginning_of_line();
+            deleted.unshift(char);
+        }
 
         this.undo_tree.delete_text_right(deleted, abs, restore_abs);
         this.undo_tree.finalize();
@@ -559,6 +572,8 @@ export class Doc {
             this.cursor.i_col -= 1;
         }
         this.stop_select();
+
+        return char;
     }
 
     delete_word() {
@@ -571,9 +586,6 @@ export class Doc {
         this.stop_select();
         this.start_select_line();
         this.delete_select();
-        if (this.is_at_eod) {
-            this.delete_char_left();
-        }
         this.move_cursor_to_first_nonblank_char_in_line();
     }
 
@@ -593,7 +605,7 @@ export class Doc {
         }
 
         if (add_to_history) {
-            this.undo_tree.insert_text(text, this.cursor.abs);
+            this.undo_tree.insert_text_right(text, this.cursor.abs);
         }
 
         for (let i = 0; i < text.length; ++i) {
@@ -615,7 +627,7 @@ export class Doc {
         let restore_abs = this.cursor.abs;
         this.move_cursor_to_end_of_line();
         if (add_to_history) {
-            this.undo_tree.insert_text(text, this.cursor.abs, restore_abs);
+            this.undo_tree.insert_text_right(text, this.cursor.abs, restore_abs);
         }
         this.insert_text(text, false);
     }
@@ -624,7 +636,7 @@ export class Doc {
         let restore_abs = this.cursor.abs;
         this.move_cursor_to_beginning_of_line();
         if (add_to_history) {
-            this.undo_tree.insert_text(text, this.cursor.abs, restore_abs);
+            this.undo_tree.insert_text_left(text, this.cursor.abs, restore_abs);
         }
         this.insert_text(text, false);
         this.move_cursor_left(1, false, false, false);
@@ -655,7 +667,13 @@ export class Doc {
                 this.move_cursor(n_steps, false, false);
                 this.insert_text([...op.text], false);
                 this.move_cursor_left(op.text.length, false, false);
-            } else if (op.op === OP.INSERT) {
+            } else if (op.op === OP.INSERT_RIGHT) {
+                let n_steps = (op.abs + op.text.length) - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else if (op.op === OP.INSERT_LEFT) {
                 let n_steps = (op.abs + op.text.length) - this.cursor.abs;
                 this.move_cursor(n_steps, false, false);
                 for (let i = 0; i < op.text.length; i++) {
@@ -670,6 +688,57 @@ export class Doc {
                 this.move_cursor(n_steps, false, false);
             }
         }
+
+        return true;
+    }
+
+    redo() {
+        let ops = this.undo_tree.redo();
+        if (ops == null) {
+            return false;
+        } else if (ops.length === 0) {
+            throw ("[ERROR] Redo received empty sequence of commands. It's a bug in the doc engine or in the undo tree");
+        }
+
+        for (let i = 0; i < ops.length; ++i) {
+            let op = ops[i];
+            let abs = op.abs;
+            let restore_abs = op.restore_abs;
+
+            if (op.op === OP.DELETE_LEFT) {
+                let n_steps = op.abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else if (op.op === OP.DELETE_RIGHT) {
+                let n_steps = (op.abs + op.text.length) - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                for (let i = 0; i < op.text.length; i++) {
+                    this.delete_char_left(false);
+                }
+            } else if (op.op === OP.INSERT_RIGHT) {
+                let n_steps = op.abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                this.insert_text(op.text, false);
+            } else if (op.op === OP.INSERT_LEFT) {
+                let n_steps = op.abs - op.text.length - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+                this.insert_text(op.text, false);
+            } else {
+                throw (`[ERROR] Unknown op type '${op.op}'. It's a bug in the doc engine or in the undo tree`)
+            }
+
+            if (restore_abs != null) {
+                let n_steps = restore_abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+            } else {
+                let n_steps = abs - this.cursor.abs;
+                this.move_cursor(n_steps, false, false);
+            }
+        }
+
+        return true;
     }
 }
 
