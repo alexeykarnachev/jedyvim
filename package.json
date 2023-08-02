@@ -1,0 +1,14 @@
+{
+    "name": "jedyvim",
+    "version": "1.0.0",
+    "scripts": {
+        "install-dependencies": "npm install",
+        "start": "npm run install-dependencies && npm run build",
+        "build": "npx webpack --entry=./src/index.ts"
+    },
+    "devDependencies": {
+        "copy-webpack-plugin": "^11.0.0",
+        "ts-loader": "^9.4.4",
+        "webpack-cli": "^5.1.4"
+    }
+}
